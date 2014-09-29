@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="2.5" type="plugin" group="crmery" method="upgrade">
-	<name>plg_mautic_name</name>
+<extension version="2.5" type="plugin" group="system" method="upgrade">
+	<name>PLG_MAUTIC_NAME</name>
 	<author>Mautic</author>
 	<creationDate>October 2014</creationDate>
 	<copyright>Copyright 2014 Mautic. All rights reserved.</copyright>
@@ -10,13 +10,9 @@
 	<version>1.0.0</version>
 	<description></description>
 	<files>
+		<folder>language</folder>
 		<filename plugin="mautic">mautic.php</filename>
 	</files>
-
-	<languages>
-		<language tag="en-GB">en-GB.plg_system_mautic.ini</language>
-		<language tag="en-GB">en-GB.plg_system_mautic.sys.ini</language>
-	</languages>
 
 	<config>
 		<fields name="params">

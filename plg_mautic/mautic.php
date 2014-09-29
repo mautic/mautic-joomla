@@ -28,17 +28,18 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function onAfterDispatch()
 	{
+		$app 		= JFactory::getApplication();
 		$document 	= JFactory::getDocument();
-		$input		= JFactory::getApplication()->input;
+		$input		= $app->input;
 
 		// Check to make sure we are loading an HTML view and there is a main component area
-		if ($document->getType() !== 'html' || $input->get('tmpl', '', 'cmd') === 'component')
+		if ($document->getType() !== 'html' || $input->get('tmpl', '', 'cmd') === 'component' || $app->isAdmin())
 		{
 			return true;
 		}
 
 		$buffer  = $document->getBuffer('component');
-		$image   = $this->params->get('base_url') . '/p/page/tracker.gif';
+		$image   = '<img src="' . $this->params->get('base_url') . '/p/page/tracker.gif' . '" />';
 		$buffer .= $image;
 
 		$document->setBuffer($buffer, 'component');
