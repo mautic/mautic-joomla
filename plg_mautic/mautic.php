@@ -39,7 +39,7 @@ class plgSystemMautic extends JPlugin
 		}
 
 		$buffer  = $document->getBuffer('component');
-		$image   = '<img src="' . $this->params->get('base_url') . '/p/page/tracker.gif' . '" />';
+		$image   = '<img src="' . $this->params->get('base_url') . '/p/mtracking.gif' . '" />';
 		$buffer .= $image;
 
 		$document->setBuffer($buffer, 'component');
