@@ -8,7 +8,7 @@
 	<authorEmail>extensions@mautic.org</authorEmail>
 	<authorUrl>www.mautic.org</authorUrl>
 	<version>1.0.0</version>
-	<description></description>
+	<description>PLG_MAUTIC_DESC</description>
 	<files>
 		<folder>language</folder>
 		<filename plugin="mautic">mautic.php</filename>
