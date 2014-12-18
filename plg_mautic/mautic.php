@@ -38,10 +38,39 @@ class plgSystemMautic extends JPlugin
 			return true;
 		}
 
-		$buffer  = $document->getBuffer('component');
-		$image   = '<img src="' . $this->params->get('base_url') . '/p/mtracking.gif' . '" />';
-		$buffer .= $image;
+        // Get additional data to send
+        $attrs = array();
+        $attrs['title'] = $document->title;
+        $attrs['language'] = $document->language;
+        $attrs['referrer'] = $_SERVER['HTTP_REFERER'];
+        $attrs['url'] = JURI::base();
 
+        $user = JFactory::getUser();
+
+        // Get info about the user if logged in
+        if (!$user->guest)
+        {
+            $attrs['email'] = $user->email;
+
+            $name = explode(' ', $user->name);
+
+            if (isset($name[0]))
+            {
+                $attrs['firstname'] = $name[0];
+            }
+
+            if (isset($name[count($name) - 1]))
+            {
+                $attrs['lastname'] = $name[count($name) - 1];
+            }
+        }
+
+		$encodedAttrs = urlencode(base64_encode(serialize($attrs)));
+
+        $buffer  = $document->getBuffer('component');
+        $image   = '<img src="' . $this->params->get('base_url') . '/p/mtracking.gif?d=' . $encodedAttrs . '" />';
+        $buffer .= $image;
+        
 		$document->setBuffer($buffer, 'component');
 
 		return true;
