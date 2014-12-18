@@ -65,10 +65,12 @@ class plgSystemMautic extends JPlugin
             }
         }
 
-		$buffer  = $document->getBuffer('component');
-		$image   = '<img src="' . $this->params->get('base_url') . '/p/mtracking.gif?' . http_build_query($attrs) . '" />';
-		$buffer .= $image;
+		$encodedAttrs = urlencode(base64_encode(serialize($attrs)));
 
+        $buffer  = $document->getBuffer('component');
+        $image   = '<img src="' . $this->params->get('base_url') . '/p/mtracking.gif?d=' . $encodedAttrs . '" />';
+        $buffer .= $image;
+        
 		$document->setBuffer($buffer, 'component');
 
 		return true;
