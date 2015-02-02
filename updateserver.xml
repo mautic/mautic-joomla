@@ -13,6 +13,21 @@
         </downloads>
         <maintainer>Mautic community</maintainer>
         <maintainerurl><![CDATA[http://mautic.org]]></maintainerurl>
-        <targetplatform name="joomla" version=".*"/>
+        <targetplatform name="joomla" version="3.3"/>
+    </update>
+    <update>
+        <name>Mautic plugin</name>
+        <description>Mautic plugin for Joomla</description>
+        <element>mautic</element>
+        <type>plugin</type>
+        <folder>system</folder>
+        <version>1.0.1</version>
+        <infourl title="Mautic"><![CDATA[https://github.com/mautic/mautic-joomla]]></infourl>
+        <downloads>
+            <downloadurl type="full" format="zip"><![CDATA[https://github.com/escopecz/mautic-joomla/archive/master.zip]]></downloadurl>
+        </downloads>
+        <maintainer>Mautic community</maintainer>
+        <maintainerurl><![CDATA[http://mautic.org]]></maintainerurl>
+        <targetplatform name="joomla" version="3.4"/>
     </update>
 </updates>
