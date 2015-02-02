@@ -25,4 +25,13 @@
 		</fields>
 	</config>
 
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_system_mautic.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_system_mautic.sys.ini</language>
+	</languages>
+
+	<updateservers>
+		<server type="extension" priority="1" name="Mautic Update Server at GitHub"><![CDATA[http://mautic.github.io/mautic-joomla/updateserver.xml]]></server>
+	</updateservers>
+
 </extension>
