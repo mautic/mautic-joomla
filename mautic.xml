@@ -31,7 +31,7 @@
 	</languages>
 
 	<updateservers>
-		<server type="mautic" priority="1" name="Mautic Update Server at GitHub">http://escopecz.github.io/mautic-joomla/updateserver.xml</server>
+		<server type="extension" priority="1" name="Mautic Update Server at GitHub">http://escopecz.github.io/mautic-joomla/updateserver.xml</server>
 	</updateservers>
 
 </extension>
