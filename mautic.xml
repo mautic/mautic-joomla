@@ -30,4 +30,8 @@
 		<language tag="en-GB">en-GB/en-GB.plg_system_mautic.sys.ini</language>
 	</languages>
 
+	<updateservers>
+		<server type="mautic" priority="1" name="Mautic Update Server at GitHub">https://escopecz.github.com/mautic-joomla</server>
+	</updateservers>
+
 </extension>
