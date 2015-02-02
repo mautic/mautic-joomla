@@ -25,4 +25,9 @@
 		</fields>
 	</config>
 
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_system_mautic.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_system_mautic.sys.ini</language>
+	</languages>
+
 </extension>
