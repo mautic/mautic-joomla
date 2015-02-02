@@ -12,5 +12,5 @@
     </downloads>
     <maintainer>Mautic community</maintainer>
     <maintainerurl>http://mautic.org</maintainerurl>
-    <targetplatform name="joomla" version="."/>
+    <targetplatform name="joomla" version=".*"/>
 </update>
