@@ -43,7 +43,7 @@ class plgSystemMautic extends JPlugin
         $attrs['title'] = $document->title;
         $attrs['language'] = $document->language;
         $attrs['referrer'] = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : JUri::current();
-        $attrs['url'] = JURI::base();
+        $attrs['url'] = JURI::getInstance()->toString();
 
         $user = JFactory::getUser();
 
