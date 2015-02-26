@@ -68,7 +68,7 @@ class plgSystemMautic extends JPlugin
 		$encodedAttrs = urlencode(base64_encode(serialize($attrs)));
 
         $buffer  = $document->getBuffer('component');
-        $image   = '<img src="' . $this->params->get('base_url') . '/p/mtracking.gif?d=' . $encodedAttrs . '" />';
+        $image   = '<img src="' . $this->params->get('base_url') . '/mtracking.gif?d=' . $encodedAttrs . '" />';
         $buffer .= $image;
         
 		$document->setBuffer($buffer, 'component');
