@@ -67,7 +67,7 @@ class plgSystemMautic extends JPlugin
 		$encodedAttrs = urlencode(base64_encode(serialize($attrs)));
 
 		$buffer		= $document->getBuffer('component');
-		$image		= '<img src="' . $this->params->get('base_url') . '/mtracking.gif?d=' . $encodedAttrs . '" />';
+		$image		= '<img src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/mtracking.gif?d=' . $encodedAttrs . '" />';
 		$buffer		.= $image;
 		
 		$document->setBuffer($buffer, 'component');
@@ -118,7 +118,7 @@ class plgSystemMautic extends JPlugin
 				if (isset($match[1]))
 				{
 					$formId = (int) $match[1];
-					$formTag = '<script type="text/javascript" src="' . $this->params->get('base_url') . '/p/form/generate.js?id=' . $formId . '"></script>';
+					$formTag = '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/p/form/generate.js?id=' . $formId . '"></script>';
 					$article->text = str_replace($match[0], $formTag, $article->text);
 				}
 			}
