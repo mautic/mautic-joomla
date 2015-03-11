@@ -17,9 +17,36 @@
 	<config>
 		<fields name="params">
 			<fieldset name="basic">
-				<field name="base_url" type="text" size="60" default=""
+				<field 
+					name="base_url" 
+					type="text" 
 					label="PLG_MAUTIC_BASE_URL"
 					description="PLG_MAUTIC_BASE_URL_DESC"
+				/>
+				<field 
+					name="public_key" 
+					type="text" 
+					label="PLG_MAUTIC_PUBLIC_KEY"
+					description="PLG_MAUTIC_PUBLIC_KEY_DESC"
+				/>
+				<field 
+					name="secret_key" 
+					type="text" 
+					label="PLG_MAUTIC_SECRET_KEY"
+					description="PLG_MAUTIC_SECRET_KEY_DESC"
+				/>
+				<field type="spacer" name="authozize_btn" label="&lt;a href='?plugin=mautic&amp;reauthorize=true' &gt;Authorize&lt;/a&gt;" />
+				<field 
+					name="access_token" 
+					type="hidden"
+				/>
+				<field 
+					name="access_token_secret" 
+					type="hidden"
+				/>
+				<field 
+					name="access_token_expires" 
+					type="hidden"
 				/>
 			</fieldset>
 		</fields>

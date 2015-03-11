@@ -13,6 +13,9 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 jimport( 'joomla.plugin.plugin' );
 
+// Include the MauticApi file which handles the API class autoloading
+require __DIR__ . '/lib/Mautic/MauticApi.php';
+
 /**
  *
  * @package		Joomla
@@ -20,6 +23,7 @@ jimport( 'joomla.plugin.plugin' );
  */
 class plgSystemMautic extends JPlugin
 {
+
 	/**
 	 * This event is triggered after the framework has loaded and the application initialise method has been called.
 	 *
@@ -123,5 +127,193 @@ class plgSystemMautic extends JPlugin
 				}
 			}
 		}
+	}
+
+	/**
+	* Mautic API call
+	*/
+	public function onAfterRoute()
+	{
+		$app = JFactory::getApplication();
+		$input = $app->input;
+		
+		if ($input->get('plugin') == 'mautic' || ($input->get('oauth_token') && $input->get('oauth_verifier')))
+		{
+			$this->authorize($input->get('reauthorize', false, 'BOOLEAN'));
+		}
+	}
+
+	/**
+	 * Create settings needed for Mautic authentication
+	 * 
+	 * @return array
+	 */
+	public function getApiSettings()
+	{
+		$mauticBaseUrl = $this->getMauticBaseUrl();
+
+		$settings = array(
+			'clientKey'			=> $this->params->get('public_key'),
+			'clientSecret'		=> $this->params->get('secret_key'),
+			'callback'			=> JURI::root() . '/administrator',
+			'accessTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/access_token',
+			'authorizationUrl'	=> $mauticBaseUrl . '/oauth/v1/authorize',
+			'requestTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/request_token'
+		);
+
+		if ($this->params->get('access_token'))
+		{
+			$settings['accessToken']		= $this->params->get('access_token');
+			$settings['accessTokenSecret']	= $this->params->get('access_token_secret');
+			$settings['accessTokenExpires']	= $this->params->get('access_token_expires');
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Create sanitized Mautic Base URL without the slash at the end.
+	 * 
+	 * @return string
+	 */
+	public function getMauticBaseUrl()
+	{
+		return trim($this->params->get('base_url'), ' \t\n\r\0\x0B/');
+	}
+
+	/**
+	 * Initiate Auth object
+	 * 
+	 * @param	array	$settings
+	 * @return	string
+	 */
+	public function getMauticAuth($settings)
+	{
+		return \Mautic\Auth\ApiAuth::initiate($settings);
+	}
+
+	/**
+	 * Get Table instance of this plugin
+	 * 
+	 * @return JTableExtension
+	 */
+	public function authorize($reauthorize = false)
+	{
+		$app = JFactory::getApplication();
+		$msg = '';
+		$re = '';
+
+		// Onlu admin can authorize
+		$user = JFactory::getUser();
+		$isRoot = $user->authorise('core.admin');
+
+		if (!$isRoot)
+		{
+			$msg = 'Only admin can authorize Mautic API application';
+			die($msg);
+		}
+
+		$mauticBaseUrl	= $this->getMauticBaseUrl();
+		$settings		= $this->getApiSettings();
+		$auth			= $this->getMauticAuth($settings);
+
+		//should the tokens be reset
+		if ($reauthorize)
+		{
+			unset($_SESSION['OAuth1a']);
+			unset($_SESSION['oauth']);
+			$re = 're';
+		}
+
+		if ($auth->validateAccessToken())
+		{
+			if ($auth->accessTokenUpdated())
+			{
+				$accessTokenData = new JRegistry($auth->getAccessTokenData());
+
+				$this->params->merge($accessTokenData);
+				$table = $this->getExtensionTable();
+				$table->set('params', $this->params->toString());
+				$table->store();
+				$app->enqueueMessage('Mautic plugin was successfully ' . $re . 'authorized against Mautic.');
+			}
+			else
+			{
+				$app->enqueueMessage('Mautic plugin was not need to authorize. It already is authorized.');
+			}
+		}
+
+		$app->redirect(JURI::root() . 'administrator/index.php?option=com_plugins&view=plugins&filter_search=mautic');
+	}
+
+	/**
+	 * Get Table instance of this plugin
+	 * 
+	 * @return JTableExtension
+	 */
+	public function getExtensionTable()
+	{
+		$table = new JTableExtension(JFactory::getDbo());
+		$table->load(array('element' => 'mautic'));
+
+		return $table;
+	}
+
+
+	/**
+	 * Create new lead on Joomla user registration
+	 * 
+	 * For debug is better to switch function to:
+	 * public function onUserBeforeSave($success, $isNew, $user)
+	 * 
+	 * @param array 	$user 		array with user information
+	 * @param boolean 	$isNew 		whether the user is new
+	 * @param boolean 	$success 	whether the user was saved successfully
+	 * @param string 	$msg 		error message
+	 */
+	public function onUserAfterSave($user, $isNew, $success, $msg = '')
+	{
+		if ($isNew && $success)
+		{
+			$mauticBaseUrl = $this->getMauticBaseUrl();
+			$auth = $this->getMauticAuth($this->getApiSettings());
+			$leadApi = \Mautic\MauticApi::getContext("leads", $auth, $mauticBaseUrl . '/api/');
+			$ip = $this->getUserIP();
+			$name = explode(' ', $user['name']);
+			
+			$mauticUser = array(
+				'ipAddress' => $ip,
+				'firstname' => isset($name[0]) ? $name[0] : '',
+				'lastname' => isset($name[1]) ? $name[1] : '',
+				'lastname' => $user['email'],
+			);
+
+			$lead = $leadApi->create($mauticUser);
+		}
+	}
+
+	/**
+	 * Try to guess the real user IP
+	 * 
+	 * @return	string
+	 */
+	public function getUserIP()
+	{
+		$ip = '';
+
+		if (!empty($_SERVER['HTTP_CLIENT_IP']))
+		{
+			$ip = $_SERVER['HTTP_CLIENT_IP'];
+		}
+		elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+		{
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
+		elseif (!empty($_SERVER['REMOTE_ADDR']))
+		{
+			$ip = $_SERVER['REMOTE_ADDR'];
+		}
+
+		return $ip;
 	}
 }
