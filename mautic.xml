@@ -11,12 +11,14 @@
 	<description>PLG_MAUTIC_DESC</description>
 	<files>
 		<folder>language</folder>
+		<folder>lib</folder>
+		<folder>fields</folder>
 		<filename plugin="mautic">mautic.php</filename>
 	</files>
 
 	<config>
 		<fields name="params">
-			<fieldset name="basic">
+			<fieldset name="basic" addfieldpath="/plugins/system/mautic/fields">
 				<field 
 					name="base_url" 
 					type="text" 
@@ -35,7 +37,12 @@
 					label="PLG_MAUTIC_SECRET_KEY"
 					description="PLG_MAUTIC_SECRET_KEY_DESC"
 				/>
-				<field type="spacer" name="authozize_btn" label="&lt;a href='?plugin=mautic&amp;reauthorize=true' &gt;Authorize&lt;/a&gt;" />
+				<field 
+					name="authorize_button" 
+					type="authorizebutton" 
+					label="PLG_MAUTIC_SECRET_KEY"
+					description="PLG_MAUTIC_SECRET_KEY_DESC"
+				/>
 				<field 
 					name="access_token" 
 					type="hidden"
