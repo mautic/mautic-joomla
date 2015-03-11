@@ -1,12 +1,11 @@
 <?php
-/*------------------------------------------------------------------------
-# Mautic
-# ------------------------------------------------------------------------
-# @author		Mautic
-# @copyright	Copyright (C) 2014 Mautic All Rights Reserved.
-# @license		http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
-# Website		http://www.mautic.org
--------------------------------------------------------------------------*/
+/**
+ * Mautic-Joomla plugin
+ * @author		Mautic
+ * @copyright	Copyright (C) 2014 Mautic All Rights Reserved.
+ * @license		http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
+ * Website		http://www.mautic.org
+ */
 
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
@@ -14,7 +13,9 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 jimport( 'joomla.plugin.plugin' );
 
 // Include the MauticApi file which handles the API class autoloading
-require __DIR__ . '/lib/Mautic/MauticApi.php';
+require_once __DIR__ . '/lib/Mautic/MauticApi.php';
+
+require_once __DIR__ . '/mauticApiHelper.php';
 
 /**
  *
@@ -23,6 +24,10 @@ require __DIR__ . '/lib/Mautic/MauticApi.php';
  */
 class plgSystemMautic extends JPlugin
 {
+	/**
+     * mauticApiHelper
+     */
+	protected $apiHelper;
 
 	/**
 	 * This event is triggered after the framework has loaded and the application initialise method has been called.
@@ -144,52 +149,20 @@ class plgSystemMautic extends JPlugin
 	}
 
 	/**
-	 * Create settings needed for Mautic authentication
-	 * 
-	 * @return array
-	 */
-	public function getApiSettings()
-	{
-		$mauticBaseUrl = $this->getMauticBaseUrl();
-
-		$settings = array(
-			'clientKey'			=> $this->params->get('public_key'),
-			'clientSecret'		=> $this->params->get('secret_key'),
-			'callback'			=> JURI::root() . '/administrator',
-			'accessTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/access_token',
-			'authorizationUrl'	=> $mauticBaseUrl . '/oauth/v1/authorize',
-			'requestTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/request_token'
-		);
-
-		if ($this->params->get('access_token'))
-		{
-			$settings['accessToken']		= $this->params->get('access_token');
-			$settings['accessTokenSecret']	= $this->params->get('access_token_secret');
-			$settings['accessTokenExpires']	= $this->params->get('access_token_expires');
-		}
-
-		return $settings;
-	}
-
-	/**
 	 * Create sanitized Mautic Base URL without the slash at the end.
 	 * 
 	 * @return string
 	 */
-	public function getMauticBaseUrl()
+	public function getMauticApiHelper()
 	{
-		return trim($this->params->get('base_url'), ' \t\n\r\0\x0B/');
-	}
+		if ($this->apiHelper)
+		{
+			return $this->apiHelper;
+		}
 
-	/**
-	 * Initiate Auth object
-	 * 
-	 * @param	array	$settings
-	 * @return	string
-	 */
-	public function getMauticAuth($settings)
-	{
-		return \Mautic\Auth\ApiAuth::initiate($settings);
+		$this->apiHelper = new mauticApiHelper;
+
+		return $this->apiHelper;
 	}
 
 	/**
@@ -200,7 +173,6 @@ class plgSystemMautic extends JPlugin
 	public function authorize($reauthorize = false)
 	{
 		$app = JFactory::getApplication();
-		$msg = '';
 		$re = '';
 
 		// Onlu admin can authorize
@@ -209,19 +181,16 @@ class plgSystemMautic extends JPlugin
 
 		if (!$isRoot)
 		{
-			$msg = 'Only admin can authorize Mautic API application';
-			die($msg);
+			die('Only admin can authorize Mautic API application');
 		}
 
-		$mauticBaseUrl	= $this->getMauticBaseUrl();
-		$settings		= $this->getApiSettings();
-		$auth			= $this->getMauticAuth($settings);
+		$apiHelper		= $this->getMauticApiHelper();
+		$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
+		$auth			= $apiHelper->getMauticAuth($reauthorize);
+		$table			= $apiHelper->getTable();
 
-		//should the tokens be reset
 		if ($reauthorize)
 		{
-			unset($_SESSION['OAuth1a']);
-			unset($_SESSION['oauth']);
 			$re = 're';
 		}
 
@@ -232,7 +201,7 @@ class plgSystemMautic extends JPlugin
 				$accessTokenData = new JRegistry($auth->getAccessTokenData());
 
 				$this->params->merge($accessTokenData);
-				$table = $this->getExtensionTable();
+				$table = $apiHelper->getTable();
 				$table->set('params', $this->params->toString());
 				$table->store();
 				$app->enqueueMessage('Mautic plugin was successfully ' . $re . 'authorized against Mautic.');
@@ -243,22 +212,8 @@ class plgSystemMautic extends JPlugin
 			}
 		}
 
-		$app->redirect(JURI::root() . 'administrator/index.php?option=com_plugins&view=plugins&filter_search=mautic');
+		$app->redirect(JURI::root() . 'administrator/index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id'));
 	}
-
-	/**
-	 * Get Table instance of this plugin
-	 * 
-	 * @return JTableExtension
-	 */
-	public function getExtensionTable()
-	{
-		$table = new JTableExtension(JFactory::getDbo());
-		$table->load(array('element' => 'mautic'));
-
-		return $table;
-	}
-
 
 	/**
 	 * Create new lead on Joomla user registration
@@ -275,11 +230,12 @@ class plgSystemMautic extends JPlugin
 	{
 		if ($isNew && $success)
 		{
-			$mauticBaseUrl = $this->getMauticBaseUrl();
-			$auth = $this->getMauticAuth($this->getApiSettings());
-			$leadApi = \Mautic\MauticApi::getContext("leads", $auth, $mauticBaseUrl . '/api/');
-			$ip = $this->getUserIP();
-			$name = explode(' ', $user['name']);
+			$apiHelper		= $this->getMauticApiHelper();
+			$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
+			$auth			= $apiHelper->getMauticAuth();
+			$leadApi		= \Mautic\MauticApi::getContext("leads", $auth, $mauticBaseUrl . '/api/');
+			$ip				= $this->getUserIP();
+			$name			= explode(' ', $user['name']);
 			
 			$mauticUser = array(
 				'ipAddress' => $ip,
