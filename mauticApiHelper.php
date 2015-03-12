@@ -110,6 +110,9 @@ class mauticApiHelper
         {
             unset($settings['accessToken']);
             unset($settings['accessTokenSecret']);
+            unset($settings['accessTokenExpires']);
+            unset($_SESSION['OAuth1a']);
+            unset($_SESSION['oauth']);
         }
 
         return \Mautic\Auth\ApiAuth::initiate($settings);
