@@ -240,8 +240,8 @@ class plgSystemMautic extends JPlugin
 			$mauticUser = array(
 				'ipAddress' => $ip,
 				'firstname' => isset($name[0]) ? $name[0] : '',
-				'lastname' => isset($name[1]) ? $name[1] : '',
-				'lastname' => $user['email'],
+				'lastname'	=> isset($name[1]) ? $name[1] : '',
+				'email'		=> $user['email'],
 			);
 
 			$lead = $leadApi->create($mauticUser);
