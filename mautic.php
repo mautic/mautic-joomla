@@ -228,7 +228,7 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function onUserAfterSave($user, $isNew, $success, $msg = '')
 	{
-		if ($isNew && $success)
+		if ($isNew && $success && $this->params->get('send_registered') == 1)
 		{
 			$apiHelper		= $this->getMauticApiHelper();
 			$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
@@ -249,7 +249,7 @@ class plgSystemMautic extends JPlugin
 	}
 
 	/**
-	 * Try to guess the real user IP
+	 * Try to guess the real user IP address
 	 * 
 	 * @return	string
 	 */
