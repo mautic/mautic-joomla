@@ -12,9 +12,6 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 
 jimport( 'joomla.plugin.plugin' );
 
-// Include the MauticApi file which handles the API class autoloading
-require_once __DIR__ . '/lib/Mautic/MauticApi.php';
-
 require_once __DIR__ . '/mauticApiHelper.php';
 
 /**
@@ -172,10 +169,6 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function authorize($reauthorize = false)
 	{
-		$app = JFactory::getApplication();
-		$re = '';
-
-		// Onlu admin can authorize
 		$user = JFactory::getUser();
 		$isRoot = $user->authorise('core.admin');
 
@@ -184,6 +177,8 @@ class plgSystemMautic extends JPlugin
 			die('Only admin can authorize Mautic API application');
 		}
 
+		$app 			= JFactory::getApplication();
+		$re 			= '';
 		$apiHelper		= $this->getMauticApiHelper();
 		$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
 		$auth			= $apiHelper->getMauticAuth($reauthorize);
