@@ -40,7 +40,7 @@ This plugin uses Joomla Update Server which notifies the Joomla admin about avai
 
 ### Integrate Mautic with another extension
 
-To add Mautic lead generation to another extension is not hard at all. Just let user install and configure this plugin then you can use Mautic API calls. Here is example how to generate Mautic leads on any form save:
+To add Mautic lead generation to another extension is not hard at all. Just let the joomla amin install and configure this plugin then you can use Mautic API calls. Here is an example how to generate Mautic leads on any form save:
 
 ```php
 // Include MauticApiHelper from the plugin 
@@ -49,14 +49,12 @@ require_once __DIR__ . '/mauticApiHelper.php';
 $apiHelper  = new mauticApiHelper;
 $leadApi    = \Mautic\MauticApi::getContext("leads", $apiHelper->getMauticAuth(), $apiHelper->getMauticBaseUrl() . '/api/');
 
-$mauticUser = array(
+$lead = $leadApi->create(array(
     'ipAddress' => $_SERVER['REMOTE_ADDR'],
     'firstname' => $formData['firstname'],
     'lastname'  => $formData['lastname'],
     'email'     => $formData['email'],
-);
-
-$lead = $leadApi->create($mauticUser);
+));
 ```
 
 More information about Mautic API calls can be found at [Mautic API Library](https://github.com/mautic/api-library) which is part of this plugin.
