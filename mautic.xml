@@ -14,6 +14,7 @@
 		<folder>lib</folder>
 		<folder>fields</folder>
 		<filename plugin="mautic">mautic.php</filename>
+		<filename>mauticApiHelper.php</filename>
 	</files>
 
 	<config>
