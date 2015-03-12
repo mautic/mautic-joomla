@@ -1,10 +1,10 @@
 <?php
 /**
  * Mautic-Joomla plugin
- * @author      Mautic
+ * @author	  Mautic
  * @copyright   Copyright (C) 2014 Mautic All Rights Reserved.
- * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
- * Website      http://www.mautic.org
+ * @license	 http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
+ * Website	  http://www.mautic.org
  */
 
 // no direct access
@@ -63,7 +63,15 @@ class mauticApiHelper
 			return $this->table;
 		}
 
-		$table = new JTableExtension(JFactory::getDbo());
+		if (version_compare(JVERSION, '3.0.0', '>'))
+		{
+			$table = new JTableExtension(JFactory::getDbo());
+		}
+		else
+		{
+			$table = JTable::getInstance('Extension', 'JTable', array());
+		}
+		
 		$table->load(array('element' => 'mautic'));
 
 		return $table;
