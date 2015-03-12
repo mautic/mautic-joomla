@@ -47,7 +47,11 @@ To add Mautic lead generation to another extension is not hard at all. Just let 
 require_once __DIR__ . '/mauticApiHelper.php';
 
 $apiHelper  = new mauticApiHelper;
-$leadApi    = \Mautic\MauticApi::getContext("leads", $apiHelper->getMauticAuth(), $apiHelper->getMauticBaseUrl() . '/api/');
+$leadApi    = \Mautic\MauticApi::getContext(
+    "leads", 
+    $apiHelper->getMauticAuth(), 
+    $apiHelper->getMauticBaseUrl() . '/api/'
+);
 
 $lead = $leadApi->create(array(
     'ipAddress' => $_SERVER['REMOTE_ADDR'],
