@@ -37,3 +37,26 @@ If you want to add more Mautic features, submit PR to this plugin or use this pl
 This plugin uses Joomla Update Server which notifies the Joomla admin about availability of new versions of this plugin. To do that, update the version tag in mautic.xml in the master branch and then update version tag at updateserver.xml in the gh-pages branch accordingly.
 
 [Current updateserver.xml](http://mautic.github.io/mautic-joomla/updateserver.xml)
+
+### Integrate Mautic with another extension
+
+To add Mautic lead generation to another extension is not hard at all. Just let user install and configure this plugin then you can use Mautic API calls. Here is example how to generate Mautic leads on any form save:
+
+```php
+// Include MauticApiHelper from the plugin 
+require_once __DIR__ . '/mauticApiHelper.php';
+
+$apiHelper  = new mauticApiHelper;
+$leadApi    = \Mautic\MauticApi::getContext("leads", $apiHelper->getMauticAuth(), $apiHelper->getMauticBaseUrl() . '/api/');
+
+$mauticUser = array(
+    'ipAddress' => $_SERVER['REMOTE_ADDR'],
+    'firstname' => $formData['firstname'],
+    'lastname'  => $formData['lastname'],
+    'email'     => $formData['email'],
+);
+
+$lead = $leadApi->create($mauticUser);
+```
+
+More information about Mautic API calls can be found at [Mautic API Library](https://github.com/mautic/api-library) which is part of this plugin.
