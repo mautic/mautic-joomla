@@ -1,10 +1,10 @@
 <?php
 /**
  * Mautic-Joomla plugin
- * @author	  Mautic
+ * @author      Mautic
  * @copyright   Copyright (C) 2014 Mautic All Rights Reserved.
- * @license	 http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
- * Website	  http://www.mautic.org
+ * @license     http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL
+ * Website      http://www.mautic.org
  */
 
 // no direct access
@@ -36,26 +36,26 @@ class JFormFieldAuthorizeButton extends JFormField
 	 */
 	protected function getInput()
 	{
-        $apiHelper = new mauticApiHelper;
-        $settings = $apiHelper->getApiSettings();
-        $url = Juri::root() . 'administrator/?plugin=mautic';
-        $text = 'PLG_MAUTIC_AUTHORIZE_BTN';
+		$apiHelper = new mauticApiHelper;
+		$settings = $apiHelper->getApiSettings();
+		$url = Juri::root() . 'administrator/?plugin=mautic';
+		$text = 'PLG_MAUTIC_AUTHORIZE_BTN';
 
-        if ($settings['accessToken'] && $settings['accessTokenSecret'])
-        {
-            $url .= '&reauthorize=true';
-            $text = 'PLG_MAUTIC_REAUTHORIZE_BTN';
-        }
+		if ($settings['accessToken'] && $settings['accessTokenSecret'])
+		{
+			$url .= '&reauthorize=true';
+			$text = 'PLG_MAUTIC_REAUTHORIZE_BTN';
+		}
 
-        if ($settings['clientKey'] && $settings['clientSecret'])
-        {
-            // Note: style is added for Joomla 2.5
-            return Jhtml::link($url, JText::_($text), array('class' => 'btn btn-small btn-success', 'style' => 'float: left;'));
-        }
-        else
-        {
-            return JText::_('PLG_MAUTIC_SAVE_KEYS_FIRST');
-        }
+		if ($settings['clientKey'] && $settings['clientSecret'])
+		{
+			// Note: style is added for Joomla 2.5
+			return Jhtml::link($url, JText::_($text), array('class' => 'btn btn-small btn-success', 'style' => 'float: left;'));
+		}
+		else
+		{
+			return JText::_('PLG_MAUTIC_SAVE_KEYS_FIRST');
+		}
 		
 	}
 }
