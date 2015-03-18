@@ -7,19 +7,75 @@
 	<license>GNU/GPL</license>
 	<authorEmail>extensions@mautic.org</authorEmail>
 	<authorUrl>www.mautic.org</authorUrl>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<description>PLG_MAUTIC_DESC</description>
 	<files>
 		<folder>language</folder>
+		<folder>lib</folder>
+		<folder>fields</folder>
 		<filename plugin="mautic">mautic.php</filename>
+		<filename>mauticApiHelper.php</filename>
 	</files>
 
 	<config>
 		<fields name="params">
-			<fieldset name="basic">
-				<field name="base_url" type="text" size="60" default=""
+			<fieldset name="basic" addfieldpath="/plugins/system/mautic/fields">
+				<field 
+					type="spacer" 
+					name="base_url_header_note" 
+					label="PLG_MAUTIC_BASE_URL_HEADER_NOTE"
+				/>
+				<field 
+					name="base_url" 
+					type="url"
+					required="true"
 					label="PLG_MAUTIC_BASE_URL"
 					description="PLG_MAUTIC_BASE_URL_DESC"
+				/>
+				<field 
+					type="spacer" 
+					name="oauth_header_note" 
+					label="PLG_MAUTIC_OAUTH_HEADER_NOTE"
+				/>
+				<field 
+					name="public_key" 
+					type="text" 
+					label="PLG_MAUTIC_PUBLIC_KEY"
+					description="PLG_MAUTIC_PUBLIC_KEY_DESC"
+				/>
+				<field 
+					name="secret_key" 
+					type="text" 
+					label="PLG_MAUTIC_SECRET_KEY"
+					description="PLG_MAUTIC_SECRET_KEY_DESC"
+				/>
+				<field 
+					name="authorize_button" 
+					type="authorizebutton" 
+					label="PLG_MAUTIC_AUTHORIZE"
+					description="PLG_MAUTIC_AUTHORIZE_DESC"
+				/>
+				<field 
+					name="send_registered" 
+					type="radio" 
+					default="0" 
+					label="PLG_MAUTIC_SEND_RETISTERED" 
+					description="PLG_MAUTIC_SEND_RETISTERED_DESC"
+					class="btn-group btn-group-yesno">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+				<field 
+					name="access_token" 
+					type="hidden"
+				/>
+				<field 
+					name="access_token_secret" 
+					type="hidden"
+				/>
+				<field 
+					name="access_token_expires" 
+					type="hidden"
 				/>
 			</fieldset>
 		</fields>
