@@ -77,6 +77,21 @@
 					name="access_token_expires" 
 					type="hidden"
 				/>
+				<field 
+					name="debug_on" 
+					type="radio" 
+					default="0" 
+					label="PLG_MAUTIC_DEBUG_ON" 
+					description="PLG_MAUTIC_DEBUG_ON_DESC"
+					class="btn-group btn-group-yesno">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+				<field 
+					label="PLG_MAUTIC_DEBUG" 
+					name="debug" 
+					type="debug"
+				/>
 			</fieldset>
 		</fields>
 	</config>

@@ -22,8 +22,8 @@ require_once __DIR__ . '/mauticApiHelper.php';
 class plgSystemMautic extends JPlugin
 {
 	/**
-     * mauticApiHelper
-     */
+	 * mauticApiHelper
+	 */
 	protected $apiHelper;
 
 	/**
@@ -183,6 +183,11 @@ class plgSystemMautic extends JPlugin
 		$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
 		$auth			= $apiHelper->getMauticAuth($reauthorize);
 		$table			= $apiHelper->getTable();
+
+		if ($this->params->get('debug_on'))
+		{
+			$auth->enableDebugMode();
+		}
 
 		if ($reauthorize)
 		{

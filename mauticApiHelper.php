@@ -89,7 +89,7 @@ class mauticApiHelper
 		$settings = array(
 			'clientKey'		 => $this->params->get('public_key'),
 			'clientSecret'	  => $this->params->get('secret_key'),
-			'callback'		  => JURI::root() . '/administrator',
+			'callback'		  => JURI::root() . 'administrator',
 			'accessTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/access_token',
 			'authorizationUrl'  => $mauticBaseUrl . '/oauth/v1/authorize',
 			'requestTokenUrl'   => $mauticBaseUrl . '/oauth/v1/request_token'
@@ -103,6 +103,16 @@ class mauticApiHelper
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns params of Mautic plugin
+	 * 
+	 * @return JRegistry
+	 */
+	public function getPluginParams()
+	{
+		return $this->params;
 	}
 
 	/**
