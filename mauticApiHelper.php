@@ -32,7 +32,7 @@ class mauticApiHelper
 
 	/**
 	 * Constructor initialize necessary variables
-	 * 
+	 *
 	 * @return void
 	 */
 	public function __construct()
@@ -43,7 +43,7 @@ class mauticApiHelper
 
 	/**
 	 * Create sanitized Mautic Base URL without the slash at the end.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getMauticBaseUrl()
@@ -53,7 +53,7 @@ class mauticApiHelper
 
 	/**
 	 * Get Table instance of this plugin
-	 * 
+	 *
 	 * @return JTableExtension
 	 */
 	public function getTable()
@@ -63,23 +63,15 @@ class mauticApiHelper
 			return $this->table;
 		}
 
-		if (version_compare(JVERSION, '3.0.0', '>'))
-		{
-			$table = new JTableExtension(JFactory::getDbo());
-		}
-		else
-		{
-			$table = JTable::getInstance('Extension', 'JTable', array());
-		}
-		
-		$table->load(array('element' => 'mautic'));
+		$table = JTable::getInstance('Extension', 'JTable', array('dbo' => JFactory::getDBO()));
+		$table->load(array('element' => 'mautic', 'folder' => 'system'));
 
 		return $table;
 	}
 
 	/**
 	 * Create settings needed for Mautic authentication
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getApiSettings()
@@ -107,7 +99,7 @@ class mauticApiHelper
 
 	/**
 	 * Initiate Auth object
-	 * 
+	 *
 	 * @return  string
 	 */
 	public function getMauticAuth($clearAccessToken = false)
