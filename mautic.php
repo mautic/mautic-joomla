@@ -177,16 +177,10 @@ class plgSystemMautic extends JPlugin
 		}
 		else
 		{
-			$re 			= '';
 			$apiHelper		= $this->getMauticApiHelper();
 			$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
 			$auth			= $apiHelper->getMauticAuth($reauthorize);
 			$table			= $apiHelper->getTable();
-
-			if ($reauthorize)
-			{
-				$re = 're';
-			}
 
 			if ($auth->validateAccessToken())
 			{
@@ -198,11 +192,12 @@ class plgSystemMautic extends JPlugin
 					$table = $apiHelper->getTable();
 					$table->set('params', $this->params->toString());
 					$table->store();
-					$app->enqueueMessage('Mautic plugin was successfully ' . $re . 'authorized against Mautic.');
+					$extraWord = $reauthorize ? 'PLG_MAUTIC_REAUTHORIZED' : 'PLG_MAUTIC_AUTHORIZED';
+					$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', $extraWord));
 				}
 				else
 				{
-					$app->enqueueMessage('Mautic plugin was not need to authorize. It already is authorized.');
+					$app->enqueueMessage(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'));
 				}
 			}
 		}
