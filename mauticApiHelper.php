@@ -10,9 +10,6 @@
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-// Include the MauticApi file which handles the API class autoloading
-require_once __DIR__ . '/lib/Mautic/MauticApi.php';
-
 /**
  * Helper class which initialize Mautic API library with needed data.
  * It is stand-alone class with no dependencies so it can be used from
@@ -39,6 +36,20 @@ class mauticApiHelper
 	{
 		$this->table = $this->getTable();
 		$this->params = new JRegistry($this->table->get('params'));
+
+		/*
+		 * Register the autoloader for the Mautic library
+		 *
+		 * Joomla! 3.2 has a native namespace capable autoloader so prefer that and use our fallback loader for older versions
+		 */
+		if (version_compare(JVERSION, '3.2', 'ge'))
+		{
+			JLoader::registerNamespace('Mautic', __DIR__ . '/lib');
+		}
+		else
+		{
+			include __DIR__ . '/lib/Mautic/AutoLoader.php';
+		}
 	}
 
 	/**
