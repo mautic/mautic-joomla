@@ -15,9 +15,7 @@ jimport( 'joomla.plugin.plugin' );
 require_once __DIR__ . '/mauticApiHelper.php';
 
 /**
- *
- * @package		Joomla
- * @subpackage	System.Mautic
+ * Mautic plugin for Joomla!
  */
 class plgSystemMautic extends JPlugin
 {
@@ -75,7 +73,7 @@ class plgSystemMautic extends JPlugin
 		$buffer		= $document->getBuffer('component');
 		$image		= '<img style="display:none" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/mtracking.gif?d=' . $encodedAttrs . '" />';
 		$buffer		.= $image;
-		
+
 		$document->setBuffer($buffer, 'component');
 
 		return true;
@@ -96,9 +94,9 @@ class plgSystemMautic extends JPlugin
 		$input		= $app->input;
 
 		// Check to make sure we are loading an HTML view and there is a main component area and content is not being indexed
-		if ($document->getType() !== 'html' 
-			|| $input->get('tmpl', '', 'cmd') === 'component' 
-			|| $app->isAdmin() 
+		if ($document->getType() !== 'html'
+			|| $input->get('tmpl', '', 'cmd') === 'component'
+			|| $app->isAdmin()
 			|| $context == 'com_finder.indexer')
 		{
 			return true;
@@ -138,7 +136,7 @@ class plgSystemMautic extends JPlugin
 	{
 		$app = JFactory::getApplication();
 		$input = $app->input;
-		
+
 		if ($input->get('plugin') == 'mautic' || ($input->get('oauth_token') && $input->get('oauth_verifier')))
 		{
 			$this->authorize($input->get('reauthorize', false, 'BOOLEAN'));
@@ -147,7 +145,7 @@ class plgSystemMautic extends JPlugin
 
 	/**
 	 * Create sanitized Mautic Base URL without the slash at the end.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getMauticApiHelper()
@@ -164,58 +162,55 @@ class plgSystemMautic extends JPlugin
 
 	/**
 	 * Get Table instance of this plugin
-	 * 
+	 *
 	 * @return JTableExtension
 	 */
 	public function authorize($reauthorize = false)
 	{
+		$app = JFactory::getApplication();
 		$user = JFactory::getUser();
 		$isRoot = $user->authorise('core.admin');
 
 		if (!$isRoot)
 		{
-			die('Only admin can authorize Mautic API application');
+			$app->enqueueMessage(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), 'warning');
 		}
-
-		$app 			= JFactory::getApplication();
-		$re 			= '';
-		$apiHelper		= $this->getMauticApiHelper();
-		$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
-		$auth			= $apiHelper->getMauticAuth($reauthorize);
-		$table			= $apiHelper->getTable();
-
-		if ($reauthorize)
+		else
 		{
-			$re = 're';
-		}
+			$apiHelper		= $this->getMauticApiHelper();
+			$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
+			$auth			= $apiHelper->getMauticAuth($reauthorize);
+			$table			= $apiHelper->getTable();
 
-		if ($auth->validateAccessToken())
-		{
-			if ($auth->accessTokenUpdated())
+			if ($auth->validateAccessToken())
 			{
-				$accessTokenData = new JRegistry($auth->getAccessTokenData());
+				if ($auth->accessTokenUpdated())
+				{
+					$accessTokenData = new JRegistry($auth->getAccessTokenData());
 
-				$this->params->merge($accessTokenData);
-				$table = $apiHelper->getTable();
-				$table->set('params', $this->params->toString());
-				$table->store();
-				$app->enqueueMessage('Mautic plugin was successfully ' . $re . 'authorized against Mautic.');
-			}
-			else
-			{
-				$app->enqueueMessage('Mautic plugin was not need to authorize. It already is authorized.');
+					$this->params->merge($accessTokenData);
+					$table = $apiHelper->getTable();
+					$table->set('params', $this->params->toString());
+					$table->store();
+					$extraWord = $reauthorize ? 'PLG_MAUTIC_REAUTHORIZED' : 'PLG_MAUTIC_AUTHORIZED';
+					$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', $extraWord));
+				}
+				else
+				{
+					$app->enqueueMessage(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'));
+				}
 			}
 		}
 
-		$app->redirect(JURI::root() . 'administrator/index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id'));
+		$app->redirect(JRoute::_('index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id')));
 	}
 
 	/**
 	 * Create new lead on Joomla user registration
-	 * 
+	 *
 	 * For debug is better to switch function to:
 	 * public function onUserBeforeSave($success, $isNew, $user)
-	 * 
+	 *
 	 * @param array 	$user 		array with user information
 	 * @param boolean 	$isNew 		whether the user is new
 	 * @param boolean 	$success 	whether the user was saved successfully
@@ -231,7 +226,7 @@ class plgSystemMautic extends JPlugin
 			$leadApi		= \Mautic\MauticApi::getContext("leads", $auth, $mauticBaseUrl . '/api/');
 			$ip				= $this->getUserIP();
 			$name			= explode(' ', $user['name']);
-			
+
 			$mauticUser = array(
 				'ipAddress' => $ip,
 				'firstname' => isset($name[0]) ? $name[0] : '',
@@ -245,7 +240,7 @@ class plgSystemMautic extends JPlugin
 
 	/**
 	 * Try to guess the real user IP address
-	 * 
+	 *
 	 * @return	string
 	 */
 	public function getUserIP()

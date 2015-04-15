@@ -10,15 +10,15 @@
 namespace Mautic\Api;
 
 /**
- * Assets Context
+ * Reports Context
  */
-class Assets extends Api
+class Reports extends Api
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'assets';
+    protected $endpoint = 'reports';
 
     /**
      * {@inheritdoc}

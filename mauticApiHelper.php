@@ -10,9 +10,6 @@
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-// Include the MauticApi file which handles the API class autoloading
-require_once __DIR__ . '/lib/Mautic/MauticApi.php';
-
 /**
  * Helper class which initialize Mautic API library with needed data.
  * It is stand-alone class with no dependencies so it can be used from
@@ -32,18 +29,32 @@ class mauticApiHelper
 
 	/**
 	 * Constructor initialize necessary variables
-	 * 
+	 *
 	 * @return void
 	 */
 	public function __construct()
 	{
 		$this->table = $this->getTable();
 		$this->params = new JRegistry($this->table->get('params'));
+
+		/*
+		 * Register the autoloader for the Mautic library
+		 *
+		 * Joomla! 3.2 has a native namespace capable autoloader so prefer that and use our fallback loader for older versions
+		 */
+		if (version_compare(JVERSION, '3.2', 'ge'))
+		{
+			JLoader::registerNamespace('Mautic', __DIR__ . '/lib');
+		}
+		else
+		{
+			include __DIR__ . '/lib/Mautic/AutoLoader.php';
+		}
 	}
 
 	/**
 	 * Create sanitized Mautic Base URL without the slash at the end.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getMauticBaseUrl()
@@ -53,7 +64,7 @@ class mauticApiHelper
 
 	/**
 	 * Get Table instance of this plugin
-	 * 
+	 *
 	 * @return JTableExtension
 	 */
 	public function getTable()
@@ -63,23 +74,15 @@ class mauticApiHelper
 			return $this->table;
 		}
 
-		if (version_compare(JVERSION, '3.0.0', '>'))
-		{
-			$table = new JTableExtension(JFactory::getDbo());
-		}
-		else
-		{
-			$table = JTable::getInstance('Extension', 'JTable', array());
-		}
-		
-		$table->load(array('element' => 'mautic'));
+		$table = JTable::getInstance('Extension', 'JTable', array('dbo' => JFactory::getDBO()));
+		$table->load(array('element' => 'mautic', 'folder' => 'system'));
 
 		return $table;
 	}
 
 	/**
 	 * Create settings needed for Mautic authentication
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getApiSettings()
@@ -107,7 +110,7 @@ class mauticApiHelper
 
 	/**
 	 * Initiate Auth object
-	 * 
+	 *
 	 * @return  string
 	 */
 	public function getMauticAuth($clearAccessToken = false)

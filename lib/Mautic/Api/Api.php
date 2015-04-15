@@ -10,31 +10,28 @@
 namespace Mautic\Api;
 
 use Mautic\Auth\AuthInterface;
-use Mautic\Exception\ContextNotFoundException;
 
 /**
  * Base API class
- *
- * @package Mautic\Api
  */
 class Api
 {
     /**
      * Common endpoint for this API
      *
-     * @var
+     * @var string
      */
     protected $endpoint;
 
     /**
      * Base URL for API endpoints
      *
-     * @var
+     * @var string
      */
     protected $baseUrl;
 
     /**
-     * @var AuthInterface $auth
+     * @var AuthInterface
      */
     private $auth;
 
@@ -51,20 +48,25 @@ class Api
     /**
      * Set the base URL for API endpoints
      *
-     * @param $url
+     * @param string $url
+     *
+     * @return $this
      */
     public function setBaseUrl($url)
     {
         if (strpos($url, -1) != '/') {
             $url .= '/';
         }
+
         $this->baseUrl = $url;
+
+        return $this;
     }
 
     /**
      * Returns a not supported error
      *
-     * @param $action
+     * @param string $action
      *
      * @return array
      */
@@ -72,7 +74,7 @@ class Api
     {
         return array(
             'error' => array(
-                'code' => 500,
+                'code'    => 500,
                 'message' => "$action is not supported at this time."
             )
         );
@@ -81,7 +83,7 @@ class Api
     /**
      * Make the API request
      *
-     * @param        $endpoint
+     * @param string $endpoint
      * @param array  $parameters
      * @param string $method
      *
@@ -89,55 +91,60 @@ class Api
      */
     public function makeRequest($endpoint, array $parameters = array(), $method = 'GET')
     {
-        $url = $this->baseUrl . $endpoint;
+        $url = $this->baseUrl.$endpoint;
 
         if (strpos($url, 'http') === false) {
-            $response = array(
+            return array(
                 'error' => array(
                     'code'    => 500,
-                    'message' => 'URL is incomplete.  Please use $this->setBaseUrl(), set base URL via as the third argument to MauticApi::getContext(), or make $endpoint a complete URL.'
+                    'message' => sprintf(
+                        'URL is incomplete.  Please use %s, set the base URL as the third argument to MauticApi::getContext(), or make $endpoint a complete URL.',
+                        __CLASS__.'setBaseUrl()'
+                    )
                 )
             );
-        } else {
-            try {
-                $response = $this->auth->makeRequest($url, $parameters, $method);
+        }
 
-                if (!is_array($response)) {
-                    //assume an error
-                    $response = array(
-                        'error' => array(
-                            'code' => 500,
-                            'message' => $response
-                        )
-                    );
-                } elseif (isset($response['error'])) {
-                    if (isset($response['error_description'])) {
-                        $error = array(
-                            'error' => array(
-                                'code' => 403,
-                                'message' => $response['error'] . ": " . $response['error_description']
-                            )
-                        );
-                        $response = $error;
-                    }
-                }
-            } catch (\Exception $e) {
-                $response = array(
+        try {
+            $response = $this->auth->makeRequest($url, $parameters, $method);
+
+            if (!is_array($response)) {
+                //assume an error
+                return array(
                     'error' => array(
-                        'code'    => $e->getCode(),
-                        'message' => $e->getMessage()
+                        'code'    => 500,
+                        'message' => $response
                     )
                 );
             }
+
+            if (isset($response['error']) && isset($response['error_description'])) {
+                return array(
+                    'error' => array(
+                        'code'    => 403,
+                        'message' => $response['error'].': '.$response['error_description']
+                    )
+                );
+            }
+        } catch (\Exception $e) {
+            return array(
+                'error' => array(
+                    'code'    => $e->getCode(),
+                    'message' => $e->getMessage()
+                )
+            );
         }
 
+        //return the response if no error condition is met
         return $response;
     }
 
     /**
      * Get a single item
      *
-     * @param $id
+     * @param int $id
+     *
+     * @return array|mixed
      */
     public function get($id)
     {
@@ -153,6 +160,8 @@ class Api
      * @param string $orderBy
      * @param string $orderByDir
      * @param bool   $publishedOnly
+     *
+     * @return array|mixed
      */
     public function getList($filter = '', $start = 0, $limit = 0, $orderBy = '', $orderByDir = 'ASC', $publishedOnly = false)
     {
@@ -189,10 +198,12 @@ class Api
      * Create a new item (if supported)
      *
      * @param array $parameters
+     *
+     * @return array|mixed
      */
     public function create(array $parameters)
     {
-        return $this->makeRequest($this->endpoint. '/new', $parameters, 'POST');
+        return $this->makeRequest($this->endpoint.'/new', $parameters, 'POST');
     }
 
     /**
@@ -207,7 +218,8 @@ class Api
     public function edit($id, array $parameters, $createIfNotExists = false)
     {
         $method = $createIfNotExists ? 'PUT' : 'PATCH';
-        return $this->makeRequest($this->endpoint . '/' . $id . '/edit', $parameters, $method);
+
+        return $this->makeRequest($this->endpoint.'/'.$id.'/edit', $parameters, $method);
     }
 
     /**
@@ -219,6 +231,6 @@ class Api
      */
     public function delete($id)
     {
-        return $this->makeRequest($this->endpoint . '/' . $id . '/delete', array(), 'DELETE');
+        return $this->makeRequest($this->endpoint.'/'.$id.'/delete', array(), 'DELETE');
     }
 }
