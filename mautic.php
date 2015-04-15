@@ -171,6 +171,8 @@ class plgSystemMautic extends JPlugin
 	{
 		$app = JFactory::getApplication();
 		$user = JFactory::getUser();
+		$lang = JFactory::getLanguage();
+		$lang->load('plg_system_mautic', JPATH_ADMINISTRATOR);
 		$isRoot = $user->authorise('core.admin');
 
 		if (!$isRoot)
