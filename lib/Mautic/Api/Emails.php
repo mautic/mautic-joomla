@@ -10,15 +10,15 @@
 namespace Mautic\Api;
 
 /**
- * Assets Context
+ * Emails Context
  */
-class Assets extends Api
+class Emails extends Api
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'assets';
+    protected $endpoint = 'emails';
 
     /**
      * {@inheritdoc}
@@ -42,5 +42,30 @@ class Assets extends Api
     public function delete($id)
     {
         return $this->actionNotSupported('delete');
+    }
+
+    /**
+     * Send email to the assigned lists
+     *
+     * @param int $id
+     *
+     * @return array|mixed
+     */
+    public function send($id)
+    {
+        return $this->makeRequest($this->endpoint.'/'.$id.'/send', array(), 'POST');
+    }
+
+    /**
+     * Send email to a specific lead
+     *
+     * @param int $id
+     * @param int $leadId
+     *
+     * @return array|mixed
+     */
+    public function sendToLead($id, $leadId)
+    {
+        return $this->makeRequest($this->endpoint.'/'.$id.'/send/lead/'.$leadId, array(), 'POST');
     }
 }
