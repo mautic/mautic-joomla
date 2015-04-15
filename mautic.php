@@ -207,7 +207,7 @@ class plgSystemMautic extends JPlugin
 			}
 			catch (Exception $e)
 			{
-				$app->enqueueMessage($e->getMessage());
+				$app->enqueueMessage($e->getMessage(), 'error');
 			}
 		}
 
