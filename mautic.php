@@ -189,6 +189,7 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function authorize($reauthorize = false)
 	{
+
 		$app = JFactory::getApplication();
 		$user = JFactory::getUser();
 		$lang = JFactory::getLanguage();
@@ -341,6 +342,9 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function log($msg, $type)
 	{
-		JLog::add($msg, $type, 'plg_mautic');
+		if ($this->params->get('log_on', 1) == 1)
+		{
+			JLog::add($msg, $type, 'plg_mautic');
+		}
 	}
 }
