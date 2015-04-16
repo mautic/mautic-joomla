@@ -41,7 +41,7 @@ class JFormFieldAuthorizeButton extends JFormField
 		$url = Juri::root() . 'administrator/?plugin=mautic';
 		$text = 'PLG_MAUTIC_AUTHORIZE_BTN';
 
-		if (!empty($settings['accessToken']) && !empty($settings['accessTokenSecret']))
+		if (!empty($settings['accessToken']))
 		{
 			$url .= '&reauthorize=true';
 			$text = 'PLG_MAUTIC_REAUTHORIZE_BTN';
