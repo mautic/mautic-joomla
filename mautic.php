@@ -10,7 +10,8 @@
 // no direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 
-jimport( 'joomla.plugin.plugin' );
+jimport('joomla.plugin.plugin');
+jimport('joomla.log.log');
 
 require_once __DIR__ . '/mauticApiHelper.php';
 
@@ -25,6 +26,23 @@ class plgSystemMautic extends JPlugin
 	 * mauticApiHelper
 	 */
 	protected $apiHelper;
+
+	/**
+	 * Object Constructor.
+	 *
+	 * @access	public
+	 * @param	object	The object to observe -- event dispatcher.
+	 * @param	object	The configuration object for the plugin.
+	 * @return	void
+	 * @since	1.0
+	 */
+	function __construct(&$subject, $config)
+	{
+		parent::__construct($subject, $config);
+
+		// Define the logger.
+		JLog::addLogger(array('text_file' => 'plg_mautic.php'), JLog::ALL, array('plg_mautic'));
+	}
 
 	/**
 	 * This event is triggered after the framework has loaded and the application initialise method has been called.
@@ -139,7 +157,9 @@ class plgSystemMautic extends JPlugin
 		$app = JFactory::getApplication();
 		$input = $app->input;
 
-		if ($input->get('plugin') == 'mautic' || ($input->get('oauth_token') && $input->get('oauth_verifier')))
+		if ($input->get('plugin') == 'mautic' 
+			|| ($input->get('oauth_token') && $input->get('oauth_verifier'))
+			|| ($input->get('state') && $input->get('code')))
 		{
 			$this->authorize($input->get('reauthorize', false, 'BOOLEAN'));
 		}
@@ -175,9 +195,12 @@ class plgSystemMautic extends JPlugin
 		$lang->load('plg_system_mautic', JPATH_ADMINISTRATOR);
 		$isRoot = $user->authorise('core.admin');
 
+		$this->log('Authorize method called.', JLog::INFO);
+
 		if (!$isRoot)
 		{
 			$app->enqueueMessage(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), 'warning');
+			$this->log(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), JLog::ERROR);
 		}
 		else
 		{
@@ -193,6 +216,7 @@ class plgSystemMautic extends JPlugin
 					if ($auth->accessTokenUpdated())
 					{
 						$accessTokenData = new JRegistry($auth->getAccessTokenData());
+						$this->log('authorize::accessTokenData: ' . var_export($accessTokenData, true), JLog::INFO);
 
 						$this->params->merge($accessTokenData);
 						$table = $apiHelper->getTable();
@@ -204,12 +228,14 @@ class plgSystemMautic extends JPlugin
 					else
 					{
 						$app->enqueueMessage(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'));
+						$this->log(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'), JLog::INFO);
 					}
 				}
 			}
 			catch (Exception $e)
 			{
 				$app->enqueueMessage($e->getMessage(), 'error');
+				$this->log($e->getMessage(), JLog::ERROR);
 			}
 		}
 
@@ -229,23 +255,57 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function onUserAfterSave($user, $isNew, $success, $msg = '')
 	{
+		$this->log('onUserAfterSave method called.', JLog::INFO);
+		$this->log('onUserAfterSave::isNew: ' . var_export($isNew, true), JLog::INFO);
+		$this->log('onUserAfterSave::success: ' . var_export($success, true), JLog::INFO);
+		$this->log('onUserAfterSave::send_registered: ' . var_export($this->params->get('send_registered'), true), JLog::INFO);
+
 		if ($isNew && $success && $this->params->get('send_registered') == 1)
 		{
-			$apiHelper		= $this->getMauticApiHelper();
-			$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
-			$auth			= $apiHelper->getMauticAuth();
-			$leadApi		= \Mautic\MauticApi::getContext("leads", $auth, $mauticBaseUrl . '/api/');
-			$ip				= $this->getUserIP();
-			$name			= explode(' ', $user['name']);
+			$this->log('onUserAfterSave: Send the user to Mautic.', JLog::INFO);
 
-			$mauticUser = array(
-				'ipAddress' => $ip,
-				'firstname' => isset($name[0]) ? $name[0] : '',
-				'lastname'	=> isset($name[1]) ? $name[1] : '',
-				'email'		=> $user['email'],
-			);
+			try
+			{
+				$apiHelper		= $this->getMauticApiHelper();
+				$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
+				$auth			= $apiHelper->getMauticAuth();
+				$leadApi		= \Mautic\MauticApi::getContext("leads", $auth, $mauticBaseUrl . '/api/');
+				$ip				= $this->getUserIP();
+				$name			= explode(' ', $user['name']);
 
-			$lead = $leadApi->create($mauticUser);
+				$mauticUser = array(
+					'ipAddress' => $ip,
+					'firstname' => isset($name[0]) ? $name[0] : '',
+					'lastname'	=> isset($name[1]) ? $name[1] : '',
+					'email'		=> $user['email'],
+				);
+
+				$this->log('onUserAfterSave::mauticUser: ' . var_export($mauticUser, true), JLog::INFO);
+
+				$result = $leadApi->create($mauticUser);
+
+				if (isset($result['error']))
+				{
+					$this->log('onUserAfterSave::leadApi::create - response: ' . $result['error']['code'] . ": " . $result['error']['message'], JLog::ERROR);
+				}
+				elseif (!empty($result['lead']['id']))
+				{
+					$this->log('onUserAfterSave: Mautic lead was successfully created with ID ' . $result['lead']['id'], JLog::INFO);
+				}
+				else
+				{
+					$this->log('onUserAfterSave: Mautic lead was NOT successfully created. ' . var_export($result, true), JLog::ERROR);
+				}
+
+			}
+			catch (Exception $e)
+			{
+				$this->log($e->getMessage(), JLog::ERROR);
+			}
+		}
+		else
+		{
+			$this->log('onUserAfterSave: Do not send the user to Mautic.', JLog::INFO);
 		}
 	}
 
@@ -272,5 +332,15 @@ class plgSystemMautic extends JPlugin
 		}
 
 		return $ip;
+	}
+
+	/**
+	 * Log helper function
+	 *
+	 * @return	string
+	 */
+	public function log($msg, $type)
+	{
+		JLog::add($msg, $type, 'plg_mautic');
 	}
 }

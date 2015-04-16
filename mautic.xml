@@ -56,12 +56,32 @@
 					label="PLG_MAUTIC_AUTHORIZE"
 					description="PLG_MAUTIC_AUTHORIZE_DESC"
 				/>
+				<field 
+					name="oauth_version" 
+					type="radio" 
+					default="OAuth2" 
+					label="PLG_MAUTIC_OAUTH_VERSION" 
+					description="PLG_MAUTIC_OAUTH_VERSION_DESC"
+					class="btn-group btn-group-yesno">
+					<option value="OAuth2">OAuth 2</option>
+					<option value="OAuth1a">OAuth 1.a</option>
+				</field>
 				<field
 					name="send_registered"
 					type="radio"
 					default="0"
 					label="PLG_MAUTIC_SEND_RETISTERED"
 					description="PLG_MAUTIC_SEND_RETISTERED_DESC"
+					class="btn-group btn-group-yesno">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+				<field 
+					name="debug_on" 
+					type="radio" 
+					default="0" 
+					label="PLG_MAUTIC_DEBUG_ON" 
+					description="PLG_MAUTIC_DEBUG_ON_DESC"
 					class="btn-group btn-group-yesno">
 					<option value="0">JNO</option>
 					<option value="1">JYES</option>
@@ -78,16 +98,6 @@
 					name="access_token_expires"
 					type="hidden"
 				/>
-				<field 
-					name="debug_on" 
-					type="radio" 
-					default="0" 
-					label="PLG_MAUTIC_DEBUG_ON" 
-					description="PLG_MAUTIC_DEBUG_ON_DESC"
-					class="btn-group btn-group-yesno">
-					<option value="0">JNO</option>
-					<option value="1">JYES</option>
-				</field>
 				<field 
 					label="PLG_MAUTIC_DEBUG" 
 					name="debug" 
