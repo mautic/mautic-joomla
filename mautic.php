@@ -189,7 +189,6 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function authorize($reauthorize = false)
 	{
-
 		$app = JFactory::getApplication();
 		$user = JFactory::getUser();
 		$lang = JFactory::getLanguage();
@@ -224,7 +223,7 @@ class plgSystemMautic extends JPlugin
 						$table->set('params', $this->params->toString());
 						$table->store();
 						$extraWord = $reauthorize ? 'PLG_MAUTIC_REAUTHORIZED' : 'PLG_MAUTIC_AUTHORIZED';
-						$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', $extraWord));
+						$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', JText::_($extraWord)));
 					}
 					else
 					{
