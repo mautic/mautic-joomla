@@ -87,22 +87,19 @@ class mauticApiHelper
 	 */
 	public function getApiSettings()
 	{
-		$mauticBaseUrl = $this->getMauticBaseUrl();
-
 		$settings = array(
-			'clientKey'		 => $this->params->get('public_key'),
-			'clientSecret'	  => $this->params->get('secret_key'),
-			'callback'		  => JURI::root() . 'administrator',
-			'accessTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/access_token',
-			'authorizationUrl'  => $mauticBaseUrl . '/oauth/v1/authorize',
-			'requestTokenUrl'   => $mauticBaseUrl . '/oauth/v1/request_token'
+			'baseUrl'		=> $this->getMauticBaseUrl(),
+			'version'		=> $this->params->get('oauth_version'),
+			'clientKey'		=> $this->params->get('public_key'),
+			'clientSecret'	=> $this->params->get('secret_key'),
+			'callback'		=> JURI::root() . 'administrator'
 		);
 
 		if ($this->params->get('access_token'))
 		{
+			$settings['accessTokenSecret']	= $this->params->get('access_token_secret');
 			$settings['accessToken']		= $this->params->get('access_token');
-			$settings['accessTokenSecret']  = $this->params->get('access_token_secret');
-			$settings['accessTokenExpires'] = $this->params->get('access_token_expires');
+			$settings['accessTokenExpires']	= $this->params->get('access_token_expires');
 		}
 
 		return $settings;
@@ -132,7 +129,11 @@ class mauticApiHelper
 			unset($settings['accessToken']);
 			unset($settings['accessTokenSecret']);
 			unset($settings['accessTokenExpires']);
+			unset($settings['expires']);
+			unset($settings['token_type']);
+			unset($settings['refresh_token']);
 			unset($_SESSION['OAuth1a']);
+			unset($_SESSION['OAuth2']);
 			unset($_SESSION['oauth']);
 		}
 
