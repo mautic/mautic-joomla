@@ -60,13 +60,13 @@ class JFormFieldDebug extends JFormField
 
 		if ($params->get('debug_on'))
 		{
-			$debug = '<pre>';
+			$debug = '<fieldset><pre>';
 			$debug .= isset($_SESSION['oauth']['debug']) ? var_export($_SESSION['oauth']['debug'], true) : 'N/A';
 			$debug .= '</pre>';
 			$debug .= '<h3>' . JText::_('PLG_MAUTIC_OAUTH_SETTINGS') . '</h3>';
 			$debug .= '<pre>';
 			$debug .= var_export($settings, true);
-			$debug .= '</pre>';
+			$debug .= '</pre></fieldset>';
 
 			return $debug;
 		}
