@@ -154,15 +154,65 @@ class plgSystemMautic extends JPlugin
 	*/
 	public function onAfterRoute()
 	{
-		$app = JFactory::getApplication();
-		$input = $app->input;
+		$user	= JFactory::getUser();
+		$app	= JFactory::getApplication();
+		$input	= $app->input;
+		$isRoot	= $user->authorise('core.admin');
 
-		if ($input->get('plugin') == 'mautic' 
-			|| ($input->get('oauth_token') && $input->get('oauth_verifier'))
+		if ($input->get('plugin') == 'mautic')
+		{
+			$lang = JFactory::getLanguage();
+			$lang->load('plg_system_mautic', JPATH_ADMINISTRATOR);
+
+			if ($isRoot)
+			{
+				if ($input->get('authorize', false, 'BOOLEAN'))
+				{
+					$this->authorize($input->get('reauthorize', false, 'BOOLEAN'));
+				}
+
+				if ($input->get('reauthorize', false, 'BOOLEAN'))
+				{
+					$this->authorize(true);
+				}
+
+				if ($input->get('reset', false, 'BOOLEAN'))
+				{
+					$this->resetAccessToken();
+				}
+			}
+			else
+			{
+				$app->enqueueMessage(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), 'warning');
+				$this->log(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), JLog::ERROR);
+			}
+		}
+
+		if (($input->get('oauth_token') && $input->get('oauth_verifier'))
 			|| ($input->get('state') && $input->get('code')))
 		{
 			$this->authorize($input->get('reauthorize', false, 'BOOLEAN'));
 		}
+	}
+
+	/**
+	 * Reset Access token so the plugin could authorize again
+	 *
+	 * @return void
+	 */
+	public function resetAccessToken()
+	{
+		$app		= JFactory::getApplication();
+		$apiHelper	= $this->getMauticApiHelper();
+		$table		= $apiHelper->getTable();
+		$this->params->set('access_token', '');
+		$this->params->set('access_token_secret', '');
+		$this->params->set('access_token_expires', '');
+		$table->set('params', $this->params->toString());
+		$table->store();
+		$app->enqueueMessage(JText::_('PLG_MAUTIC_RESET_SUCCESSFUL'));
+		$this->log(JText::_('PLG_MAUTIC_RESET_SUCCESSFUL'), JLog::INFO);
+		$app->redirect(JRoute::_('index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id'), false));
 	}
 
 	/**
@@ -189,54 +239,44 @@ class plgSystemMautic extends JPlugin
 	 */
 	public function authorize($reauthorize = false)
 	{
-		$app = JFactory::getApplication();
-		$user = JFactory::getUser();
-		$lang = JFactory::getLanguage();
+		$app			= JFactory::getApplication();
+		$apiHelper		= $this->getMauticApiHelper();
+		$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
+		$auth			= $apiHelper->getMauticAuth($reauthorize);
+		$table			= $apiHelper->getTable();
+		$lang			= JFactory::getLanguage();
+		
 		$lang->load('plg_system_mautic', JPATH_ADMINISTRATOR);
-		$isRoot = $user->authorise('core.admin');
 
 		$this->log('Authorize method called.', JLog::INFO);
 
-		if (!$isRoot)
+		try 
 		{
-			$app->enqueueMessage(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), 'warning');
-			$this->log(JText::_('PLG_MAUTIC_ERROR_ONLY_ADMIN_CAN_AUTHORIZE'), JLog::ERROR);
-		}
-		else
-		{
-			$apiHelper		= $this->getMauticApiHelper();
-			$mauticBaseUrl	= $apiHelper->getMauticBaseUrl();
-			$auth			= $apiHelper->getMauticAuth($reauthorize);
-			$table			= $apiHelper->getTable();
-
-			try 
+			if ($auth->validateAccessToken())
 			{
-				if ($auth->validateAccessToken())
+				if ($auth->accessTokenUpdated())
 				{
-					if ($auth->accessTokenUpdated())
-					{
-						$accessTokenData = new JRegistry($auth->getAccessTokenData());
-						$this->log('authorize::accessTokenData: ' . var_export($accessTokenData, true), JLog::INFO);
+					$accessTokenData = new JRegistry($auth->getAccessTokenData());
+					$this->log('authorize::accessTokenData: ' . var_export($accessTokenData, true), JLog::INFO);
 
-						$this->params->merge($accessTokenData);
-						$table = $apiHelper->getTable();
-						$table->set('params', $this->params->toString());
-						$table->store();
-						$extraWord = $reauthorize ? 'PLG_MAUTIC_REAUTHORIZED' : 'PLG_MAUTIC_AUTHORIZED';
-						$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', JText::_($extraWord)));
-					}
-					else
-					{
-						$app->enqueueMessage(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'));
-						$this->log(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'), JLog::INFO);
-					}
+					$this->params->merge($accessTokenData);
+					$table = $apiHelper->getTable();
+					$table->set('params', $this->params->toString());
+					$table->store();
+					$extraWord = $reauthorize ? 'PLG_MAUTIC_REAUTHORIZED' : 'PLG_MAUTIC_AUTHORIZED';
+					$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', JText::_($extraWord)));
+				}
+				else
+				{
+					$app->enqueueMessage(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'));
+					$this->log(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'), JLog::INFO);
 				}
 			}
-			catch (Exception $e)
-			{
-				$app->enqueueMessage($e->getMessage(), 'error');
-				$this->log($e->getMessage(), JLog::ERROR);
-			}
+		}
+		catch (Exception $e)
+		{
+			$app->enqueueMessage($e->getMessage(), 'error');
+			$this->log($e->getMessage(), JLog::ERROR);
 		}
 
 		$app->redirect(JRoute::_('index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id'), false));

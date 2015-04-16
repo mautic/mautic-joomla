@@ -46,11 +46,24 @@ class JFormFieldAuthorizeButton extends JFormField
 			$url .= '&reauthorize=true';
 			$text = 'PLG_MAUTIC_REAUTHORIZE_BTN';
 		}
+		else
+		{
+			$url .= '&authorize=true';
+		}
 
 		if (!empty($settings['clientKey']) && !empty($settings['clientSecret']))
 		{
 			// Note: style is added for Joomla 2.5
-			return Jhtml::link($url, JText::_($text), array('class' => 'btn btn-small btn-success', 'style' => 'float: left;'));
+			$btn = Jhtml::link($url, JText::_($text), array('class' => 'btn btn-small btn-success', 'style' => 'float: left;'));
+
+			if (!empty($settings['accessToken']))
+			{
+				$resetUrl = Juri::root() . 'administrator/?plugin=mautic&reset=true';
+				$btn .= ' <span style="float: left;  padding: 0 4px;">|</span> ';
+				$btn .= Jhtml::link($resetUrl, JText::_('PLG_MAUTIC_RESET_BTN'), array('class' => 'btn btn-small btn-default pull-right', 'style' => 'float: left;'));
+			}
+
+			return $btn;
 		}
 		else
 		{
