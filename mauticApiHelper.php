@@ -97,9 +97,10 @@ class mauticApiHelper
 
 		if ($this->params->get('access_token'))
 		{
-			$settings['accessTokenSecret']	= $this->params->get('access_token_secret');
 			$settings['accessToken']		= $this->params->get('access_token');
-			$settings['accessTokenExpires']	= $this->params->get('access_token_expires');
+			$settings['accessTokenSecret']	= $this->params->get('access_token_secret');
+			$settings['accessTokenExpires']	= $this->params->get('access_token_expires', $this->params->get('expires'));
+			$settings['refreshToken']		= $this->params->get('refresh_token');
 		}
 
 		return $settings;
@@ -129,9 +130,7 @@ class mauticApiHelper
 			unset($settings['accessToken']);
 			unset($settings['accessTokenSecret']);
 			unset($settings['accessTokenExpires']);
-			unset($settings['expires']);
-			unset($settings['token_type']);
-			unset($settings['refresh_token']);
+			unset($settings['refreshToken']);
 			unset($_SESSION['OAuth1a']);
 			unset($_SESSION['OAuth2']);
 			unset($_SESSION['oauth']);
