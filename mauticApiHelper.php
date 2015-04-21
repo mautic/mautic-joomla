@@ -48,7 +48,7 @@ class mauticApiHelper
 		}
 		else
 		{
-			include __DIR__ . '/lib/Mautic/AutoLoader.php';
+			include_once __DIR__ . '/lib/Mautic/AutoLoader.php';
 		}
 	}
 
@@ -87,25 +87,33 @@ class mauticApiHelper
 	 */
 	public function getApiSettings()
 	{
-		$mauticBaseUrl = $this->getMauticBaseUrl();
-
 		$settings = array(
-			'clientKey'		 => $this->params->get('public_key'),
-			'clientSecret'	  => $this->params->get('secret_key'),
-			'callback'		  => JURI::root() . '/administrator',
-			'accessTokenUrl'	=> $mauticBaseUrl . '/oauth/v1/access_token',
-			'authorizationUrl'  => $mauticBaseUrl . '/oauth/v1/authorize',
-			'requestTokenUrl'   => $mauticBaseUrl . '/oauth/v1/request_token'
+			'baseUrl'		=> $this->getMauticBaseUrl(),
+			'version'		=> $this->params->get('oauth_version'),
+			'clientKey'		=> $this->params->get('public_key'),
+			'clientSecret'	=> $this->params->get('secret_key'),
+			'callback'		=> JURI::root() . 'administrator'
 		);
 
 		if ($this->params->get('access_token'))
 		{
 			$settings['accessToken']		= $this->params->get('access_token');
-			$settings['accessTokenSecret']  = $this->params->get('access_token_secret');
-			$settings['accessTokenExpires'] = $this->params->get('access_token_expires');
+			$settings['accessTokenSecret']	= $this->params->get('access_token_secret');
+			$settings['accessTokenExpires']	= $this->params->get('access_token_expires', $this->params->get('expires'));
+			$settings['refreshToken']		= $this->params->get('refresh_token');
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns params of Mautic plugin
+	 * 
+	 * @return JRegistry
+	 */
+	public function getPluginParams()
+	{
+		return $this->params;
 	}
 
 	/**
@@ -122,7 +130,9 @@ class mauticApiHelper
 			unset($settings['accessToken']);
 			unset($settings['accessTokenSecret']);
 			unset($settings['accessTokenExpires']);
+			unset($settings['refreshToken']);
 			unset($_SESSION['OAuth1a']);
+			unset($_SESSION['OAuth2']);
 			unset($_SESSION['oauth']);
 		}
 
