@@ -157,7 +157,7 @@ class plgSystemMautic extends JPlugin
 		$user	= JFactory::getUser();
 		$app	= JFactory::getApplication();
 		$input	= $app->input;
-		$isRoot	= $user->authorise('core.admin');
+		$isRoot	= true; // $user->authorise('core.admin');
 
 		if ($input->get('plugin') == 'mautic')
 		{
@@ -245,6 +245,7 @@ class plgSystemMautic extends JPlugin
 		$auth			= $apiHelper->getMauticAuth($reauthorize);
 		$table			= $apiHelper->getTable();
 		$lang			= JFactory::getLanguage();
+		$message 		= '';
 		
 		$lang->load('plg_system_mautic', JPATH_ADMINISTRATOR);
 
@@ -264,22 +265,28 @@ class plgSystemMautic extends JPlugin
 					$table->set('params', $this->params->toString());
 					$table->store();
 					$extraWord = $reauthorize ? 'PLG_MAUTIC_REAUTHORIZED' : 'PLG_MAUTIC_AUTHORIZED';
-					$app->enqueueMessage(JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', JText::_($extraWord)));
+					$message = JText::sprintf('PLG_MAUTIC_REAUTHORIZE_SUCCESS', JText::_($extraWord));
+					$this->log($message, JLog::INFO);
 				}
 				else
 				{
-					$app->enqueueMessage(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'));
+					$message = JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED');
 					$this->log(JText::_('PLG_MAUTIC_REAUTHORIZE_NOT_NEEDED'), JLog::INFO);
 				}
+			}
+			else
+			{
+				$message = JText::_('PLG_MAUTIC_ACCESS_TOKEN_NOT_VALID');
+				$this->log(JText::_('PLG_MAUTIC_ACCESS_TOKEN_NOT_VALID'), JLog::ERROR);
 			}
 		}
 		catch (Exception $e)
 		{
-			$app->enqueueMessage($e->getMessage(), 'error');
+			$message = $e->getMessage();
 			$this->log($e->getMessage(), JLog::ERROR);
 		}
 
-		$app->redirect(JRoute::_('index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id'), false));
+		$app->redirect(JURI::base() . 'administrator/index.php?option=com_plugins&view=plugin&layout=edit&extension_id=' . $table->get('extension_id'), $message);
 	}
 
 	/**

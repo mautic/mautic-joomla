@@ -53,20 +53,28 @@ class JFormFieldDebug extends JFormField
 	 */
 	protected function getInput()
 	{
-		$apiHelper  = new mauticApiHelper;
-		$settings   = $apiHelper->getApiSettings();
+		$apiHelper = new mauticApiHelper;
+		$settings = $apiHelper->getApiSettings();
 		$params	 = $apiHelper->getPluginParams();
-		$debug	  = '';
+		$debug = '';
+		$config = JFactory::getConfig();
+		$logPath = $config->get('log_path') . '/plg_mautic.php';
+		$log = file_exists($logPath) && is_readable($logPath) ? file($logPath) : null;
+		$recentLog = is_array($log) ? array_slice($log, -30) : null;
 
 		if ($params->get('debug_on'))
 		{
-			$debug = '<fieldset><pre>';
-			$debug .= isset($_SESSION['oauth']['debug']) ? var_export($_SESSION['oauth']['debug'], true) : 'N/A';
+			$debug = '<fieldset>';
+			$debug .= '<h3>' . JText::_('PLG_MAUTIC_RECENT_LOG') . ' <small>(' . $logPath . ')</small></h3>';
+			$debug .= '<pre>';
+			$debug .= is_array($log) ? implode('', array_reverse($recentLog)) : JText::_('PLG_MAUTIC_LOG_NOT_AVAILABLE');
 			$debug .= '</pre>';
 			$debug .= '<h3>' . JText::_('PLG_MAUTIC_OAUTH_SETTINGS') . '</h3>';
 			$debug .= '<pre>';
 			$debug .= var_export($settings, true);
 			$debug .= '</pre></fieldset>';
+
+			unset($_SESSION['mautic_oauth_message']);
 
 			return $debug;
 		}

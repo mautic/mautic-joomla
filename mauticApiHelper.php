@@ -92,7 +92,7 @@ class mauticApiHelper
 			'version'		=> $this->params->get('oauth_version'),
 			'clientKey'		=> $this->params->get('public_key'),
 			'clientSecret'	=> $this->params->get('secret_key'),
-			'callback'		=> JURI::root() . 'administrator'
+			'callback'		=> JURI::root()
 		);
 
 		if ($this->params->get('access_token'))
