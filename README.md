@@ -27,7 +27,7 @@ It is possible to send Lead data to Mautic via API only after authorization. You
 
 1. Go to Mautic Configuration / API Settings and set 'API enabled' to 'Yes', leave 'API mode' to 'OAuth1'. Save changes.
 2. At the right-hand side menu where Configuration is should appear new menu item 'API Credentials'. Hit it.
-3. Create new credential. Fill in 'Name' ('Joomla plugin' for example) and Callback URL to ```http://{yourJoomla.com}/administrator``` (change ```{yourJoomla.com}``` with actual URL of your Joomla instance). It goes to /administrator to make sure only Joomla admins can authorize Mautic plugin. Save credentials.
+3. Create new credential. Fill in 'Name' ('Joomla plugin' for example) and Callback URL to ```http://{yourJoomla.com}``` (change ```{yourJoomla.com}``` with actual URL of your Joomla instance). Save the credentials.
 4. Mautic should generate 'Consumer Key' and 'Consumer Secret' key. Copy those two to Joomla plugin. Save the plugin. Hit the 'Authorize' button and follow instructions.
 
 ## Developer notes
