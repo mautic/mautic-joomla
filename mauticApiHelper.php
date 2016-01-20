@@ -59,7 +59,7 @@ class mauticApiHelper
 	 */
 	public function getMauticBaseUrl()
 	{
-		return trim($this->params->get('base_url'), ' \t\n\r\0\x0B/');
+		return trim($this->params->get('base_url'), " \t\n\r\0\x0B/");
 	}
 
 	/**
