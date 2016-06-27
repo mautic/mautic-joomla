@@ -17,9 +17,17 @@ There will be probably longer URL query string at the end of the tracking image 
 
 To embed a Mautic form into Joomla content, insert this code snippet:
 
-	{mauticform ID}
+	{mautic type="form" ID}
 
 ID is the identifier of the Mautic form you want to embed. You can see the ID of the form in the URL of the form detail. For example for ```www.yourmautic.com/forms/view/1```, ID = 1.
+
+### Dynamic content embed
+
+To embed Mautic dynamic content, insert this code snippet:
+
+    {mautic type="content" slot="slot_name"}Default content here.{/mautic}
+
+slot_name is the identifier of the slot that you specified when adding a "Request dynamic content" decision to your campaign.
 
 ### Plugin authorization
 

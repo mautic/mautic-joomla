@@ -31,9 +31,8 @@ class plgSystemMautic extends JPlugin
 	 * Object Constructor.
 	 *
 	 * @access	public
-	 * @param	object	The object to observe -- event dispatcher.
-	 * @param	object	The configuration object for the plugin.
-	 * @return	void
+	 * @param	object	$subject The object to observe -- event dispatcher.
+	 * @param	object	$config  The configuration object for the plugin.
 	 * @since	1.0
 	 */
 	function __construct(&$subject, $config)
@@ -45,15 +44,15 @@ class plgSystemMautic extends JPlugin
 	}
 
 	/**
-	 * This event is triggered after the framework has loaded and the application initialise method has been called.
+	 * This event is triggered before the framework creates the Head section of the Document.
 	 *
-	 * @return	void
+	 * @return	mixed
 	 */
-	public function onAfterDispatch()
+	public function onBeforeCompileHead()
 	{
-		$app		= JFactory::getApplication();
-		$document	= JFactory::getDocument();
-		$input		= $app->input;
+		$app      = JFactory::getApplication();
+		$document = JFactory::getDocument();
+		$input    = $app->input;
 
 		// Check to make sure we are loading an HTML view and there is a main component area
 		if ($document->getType() !== 'html' || $input->get('tmpl', '', 'cmd') === 'component' || $app->isAdmin())
@@ -61,12 +60,7 @@ class plgSystemMautic extends JPlugin
 			return true;
 		}
 
-		// Get additional data to send
 		$attrs = array();
-		$attrs['title']		= $document->title;
-		$attrs['language']	= $document->language;
-		$attrs['referrer']	= isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : JUri::current();
-		$attrs['url'] 		= JURI::getInstance()->toString();
 
 		$user = JFactory::getUser();
 
@@ -82,19 +76,27 @@ class plgSystemMautic extends JPlugin
 				$attrs['firstname'] = $name[0];
 			}
 
-			if (isset($name[count($name) - 1]))
+			$count = count($name);
+			$lastNamePos = $count -1;
+
+			if ($lastNamePos !== 0 && isset($name[$lastNamePos]))
 			{
-				$attrs['lastname'] = $name[count($name) - 1];
+				$attrs['lastname'] = $name[$lastNamePos];
 			}
 		}
 
-		$encodedAttrs = urlencode(base64_encode(serialize($attrs)));
+		$mauticUrl = trim($this->params->get('base_url'), ' \t\n\r\0\x0B/');
+		$attrs     = json_encode($attrs, JSON_FORCE_OBJECT);
 
-		$buffer		= $document->getBuffer('component');
-		$image		= '<img style="display:none" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/mtracking.gif?d=' . $encodedAttrs . '" />';
-		$buffer		.= $image;
+		$mauticTrackingJS = <<<JS
+    (function(w,d,t,u,n,a,m){w['MauticTrackingObject']=n;
+        w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)},a=d.createElement(t),
+        m=d.getElementsByTagName(t)[0];a.async=1;a.src=u;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','{$mauticUrl}/mtc.js','mt');
 
-		$document->setBuffer($buffer, 'component');
+    mt('send', 'pageview', {$attrs});
+JS;
+		$document->addScriptDeclaration($mauticTrackingJS);
 
 		return true;
 	}
@@ -102,10 +104,12 @@ class plgSystemMautic extends JPlugin
 	/**
 	 * Insert form script to the content
 	 *
-	 * @param	string	The context of the content being passed to the plugin.
-	 * @param	object	The article object.  Note $article->text is also available
-	 * @param	object	The article params
-	 * @param	integer	The 'page' number
+	 * @param	string	$context The context of the content being passed to the plugin.
+	 * @param	object	$article The article object.  Note $article->text is also available
+	 * @param	object	$params  The article params
+	 * @param	integer	$page    The 'page' number
+	 *
+	 * @return  mixed
 	 */
 	public function onContentPrepare($context, &$article, &$params, $page = 0)
 	{
@@ -123,30 +127,83 @@ class plgSystemMautic extends JPlugin
 		}
 
 		// simple performance check to determine whether bot should process further
-		if (strpos($article->text, '{mauticform') === false)
+		if (strpos($article->text, '{mautic') === false)
 		{
 			return true;
 		}
 
-		// expression to search for (positions)
-		$regex = '/{mauticform\s+(.*?)}/i';
-
-		// Find all instances of plugin and put in $matches for githubrepo
-		// $matches[0] is full pattern match, $matches[1] is the repo declaration
-		preg_match_all($regex, $article->text, $matches, PREG_SET_ORDER);
-
-		if ($matches && isset($matches[0]))
+		// Should we do mautic form replacements?
+		if (strpos($article->text, '{mauticform') !== false || strpos($article->text, '{mautic type="form"') !== false)
 		{
-			foreach ($matches as $match)
+			// BC layer to allow old {mauticform tags to work
+			$article->text = str_replace('{mauticform', '{mautic type="form"', $article->text);
+
+			// expression to search for (positions)
+			$formRegex = '/{mautic type="form" (\d+)}/i';
+
+			// $matches[0] is full pattern match, $matches[1] is the repo declaration
+			preg_match_all($formRegex, $article->text, $matches, PREG_SET_ORDER);
+
+			if ($matches && isset($matches[0]))
 			{
-				if (isset($match[1]))
+				foreach ($matches as $match)
 				{
-					$formId = (int) $match[1];
-					$formTag = '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $formId . '"></script>';
-					$article->text = str_replace($match[0], $formTag, $article->text);
+					if (isset($match[1]))
+					{
+						$formId = (int) $match[1];
+						$formTag = '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $formId . '"></script>';
+						$article->text = str_replace($match[0], $formTag, $article->text);
+					}
 				}
 			}
 		}
+
+		// Should we do mautic content replacements?
+		if (strpos($article->text, '{mautic type="content"') !== false)
+		{
+			$this->doContentReplacement($article->text);
+
+			// Replace empty default content with full tag, and do it again
+			$tmpText = preg_replace('/{mautic type="content" slot="(\w+)"}/i', '{mautic type="content" slot="$1"}{/mautic}', $article->text);
+
+			// If any replacements occured, there is a content item with an empty default content
+			if ($article->text !== $tmpText)
+			{
+				$article->text = $this->doContentReplacement($tmpText);
+			}
+		}
+	}
+
+	/**
+	 * Does a search/replace for Mautic dynamic content
+	 *
+	 * @param $content
+	 *
+	 * @return string
+	 */
+	private function doContentReplacement($content)
+	{
+		// Replace full tags
+		$contentRegex = '/{mautic type="content" slot="(\w+)"}(.*){\/mautic}/i';
+
+		// $matches[0] is full pattern match, $matches[1] is the repo declaration
+		preg_match_all($contentRegex, $content, $dwcMatches, PREG_SET_ORDER);
+
+		if ($dwcMatches && isset($dwcMatches[0]))
+		{
+			foreach ($dwcMatches as $dwcMatch)
+			{
+				if (isset($dwcMatch[1]))
+				{
+					$slot = $dwcMatch[1];
+					$content = $dwcMatch[2];
+					$dwcTag = '<div class="mautic-slot" data-slot-name="' . $slot . '">' . $content . '</div>';
+					$content = str_replace($dwcMatch[0], $dwcTag, $content);
+				}
+			}
+		}
+
+		return $content;
 	}
 
 	/**
