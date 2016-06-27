@@ -196,8 +196,8 @@ JS;
 				if (isset($dwcMatch[1]))
 				{
 					$slot = $dwcMatch[1];
-					$content = $dwcMatch[2];
-					$dwcTag = '<div class="mautic-slot" data-slot-name="' . $slot . '">' . $content . '</div>';
+					$defaultContent = $dwcMatch[2];
+					$dwcTag = '<div class="mautic-slot" data-slot-name="' . $slot . '">' . $defaultContent . '</div>';
 					$content = str_replace($dwcMatch[0], $dwcTag, $content);
 				}
 			}
