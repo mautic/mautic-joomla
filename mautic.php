@@ -238,7 +238,9 @@ JS;
      */
 	public function doFormShortcode($atts)
     {
-        return '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $atts['id'] . '"></script>';
+        $id = isset($atts['id']) ? $atts['id'] : $atts[0];
+
+        return '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $id . '"></script>';
     }
 
     /**
