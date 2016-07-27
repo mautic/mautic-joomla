@@ -115,69 +115,6 @@ JS;
 		return true;
 	}
 
-    /**
-     * Taken from WP wp_parse_shortcode_atts
-     *
-     * @param $text
-     *
-     * @return array|string
-     */
-    private function parseShortcodeAtts($text)
-    {
-        $atts = array();
-        $text = preg_replace("/[\x{00a0}\x{200b}]+/u", " ", $text);
-
-        if ( preg_match_all($this->attsRegex, $text, $match, PREG_SET_ORDER) ) {
-            foreach ($match as $m) {
-                if (!empty($m[1]))
-                    $atts[strtolower($m[1])] = stripcslashes($m[2]);
-                elseif (!empty($m[3]))
-                    $atts[strtolower($m[3])] = stripcslashes($m[4]);
-                elseif (!empty($m[5]))
-                    $atts[strtolower($m[5])] = stripcslashes($m[6]);
-                elseif (isset($m[7]) && strlen($m[7]))
-                    $atts[] = stripcslashes($m[7]);
-                elseif (isset($m[8]))
-                    $atts[] = stripcslashes($m[8]);
-            }
-            // Reject any unclosed HTML elements
-            foreach( $atts as &$value ) {
-                if ( false !== strpos( $value, '<' ) ) {
-                    if ( 1 !== preg_match( '/^[^<]*+(?:<[^>]*+>[^<]*+)*+$/', $value ) ) {
-                        $value = '';
-                    }
-                }
-            }
-        } else {
-            $atts = ltrim($text);
-        }
-
-        return $atts;
-    }
-
-    /**
-     * Taken fro WP wp_shortcode_atts
-     *
-     * @param array $pairs
-     * @param array $atts
-     *
-     * @return array
-     */
-    private function filterAtts(array $pairs, array $atts)
-    {
-        $out = array();
-
-        foreach ($pairs as $name => $default) {
-            if (array_key_exists($name, $atts)) {
-                $out[$name] = $atts[$name];
-            } else {
-                $out[$name] = $default;
-            }
-        }
-
-        return $out;
-    }
-
 	/**
 	 * Insert form script to the content
 	 *
@@ -259,11 +196,11 @@ JS;
     /**
      * Do a find/replace for Mautic gated video
      *
-     * @param $content
+     * @param array $atts
      *
      * @return string
      */
-    public function doVideoShortcode($atts, $content)
+    public function doVideoShortcode($atts)
     {
         $video_type = '';
         $atts = $this->filterAtts(array(
@@ -545,4 +482,67 @@ JS;
 			JLog::add($msg, $type, 'plg_mautic');
 		}
 	}
+
+    /**
+     * Taken from WP wp_parse_shortcode_atts
+     *
+     * @param $text
+     *
+     * @return array|string
+     */
+    private function parseShortcodeAtts($text)
+    {
+        $atts = array();
+        $text = preg_replace("/[\x{00a0}\x{200b}]+/u", " ", $text);
+
+        if ( preg_match_all($this->attsRegex, $text, $match, PREG_SET_ORDER) ) {
+            foreach ($match as $m) {
+                if (!empty($m[1]))
+                    $atts[strtolower($m[1])] = stripcslashes($m[2]);
+                elseif (!empty($m[3]))
+                    $atts[strtolower($m[3])] = stripcslashes($m[4]);
+                elseif (!empty($m[5]))
+                    $atts[strtolower($m[5])] = stripcslashes($m[6]);
+                elseif (isset($m[7]) && strlen($m[7]))
+                    $atts[] = stripcslashes($m[7]);
+                elseif (isset($m[8]))
+                    $atts[] = stripcslashes($m[8]);
+            }
+            // Reject any unclosed HTML elements
+            foreach( $atts as &$value ) {
+                if ( false !== strpos( $value, '<' ) ) {
+                    if ( 1 !== preg_match( '/^[^<]*+(?:<[^>]*+>[^<]*+)*+$/', $value ) ) {
+                        $value = '';
+                    }
+                }
+            }
+        } else {
+            $atts = ltrim($text);
+        }
+
+        return $atts;
+    }
+
+    /**
+     * Taken fro WP wp_shortcode_atts
+     *
+     * @param array $pairs
+     * @param array $atts
+     *
+     * @return array
+     */
+    private function filterAtts(array $pairs, array $atts)
+    {
+        $out = array();
+
+        foreach ($pairs as $name => $default) {
+            if (array_key_exists($name, $atts)) {
+                $out[$name] = $atts[$name];
+            } else {
+                $out[$name] = $default;
+            }
+        }
+
+        return $out;
+    }
 }
