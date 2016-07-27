@@ -22,6 +22,20 @@ require_once __DIR__ . '/mauticApiHelper.php';
  */
 class plgSystemMautic extends JPlugin
 {
+    /**
+     * Regex to capture all {mautic} tags in content
+     *
+     * @var string
+     */
+    protected $mauticRegex = '/\{(\{?)(mautic)(?![\w-])([^\}\/]*(?:\/(?!\})[^\}\/]*)*?)(?:(\/)\}|\}(?:([^\{]*+(?:\[(?!\/\2\])[^\[]*+)*+)\{\/\2\})?)(\}?)/i';
+
+    /**
+     * Taken from WP get_shortcode_atts_regex
+     *
+     * @var string
+     */
+    protected $attsRegex   = '/([\w-]+)\s*=\s*"([^"]*)"(?:\s|$)|([\w-]+)\s*=\s*\'([^\']*)\'(?:\s|$)|([\w-]+)\s*=\s*([^\s\'"]+)(?:\s|$)|"([^"]*)"(?:\s|$)|(\S+)(?:\s|$)/';
+
 	/**
 	 * mauticApiHelper
 	 */
@@ -101,6 +115,69 @@ JS;
 		return true;
 	}
 
+    /**
+     * Taken from WP wp_parse_shortcode_atts
+     *
+     * @param $text
+     *
+     * @return array|string
+     */
+    private function parseShortcodeAtts($text)
+    {
+        $atts = array();
+        $text = preg_replace("/[\x{00a0}\x{200b}]+/u", " ", $text);
+
+        if ( preg_match_all($this->attsRegex, $text, $match, PREG_SET_ORDER) ) {
+            foreach ($match as $m) {
+                if (!empty($m[1]))
+                    $atts[strtolower($m[1])] = stripcslashes($m[2]);
+                elseif (!empty($m[3]))
+                    $atts[strtolower($m[3])] = stripcslashes($m[4]);
+                elseif (!empty($m[5]))
+                    $atts[strtolower($m[5])] = stripcslashes($m[6]);
+                elseif (isset($m[7]) && strlen($m[7]))
+                    $atts[] = stripcslashes($m[7]);
+                elseif (isset($m[8]))
+                    $atts[] = stripcslashes($m[8]);
+            }
+            // Reject any unclosed HTML elements
+            foreach( $atts as &$value ) {
+                if ( false !== strpos( $value, '<' ) ) {
+                    if ( 1 !== preg_match( '/^[^<]*+(?:<[^>]*+>[^<]*+)*+$/', $value ) ) {
+                        $value = '';
+                    }
+                }
+            }
+        } else {
+            $atts = ltrim($text);
+        }
+
+        return $atts;
+    }
+
+    /**
+     * Taken fro WP wp_shortcode_atts
+     *
+     * @param array $pairs
+     * @param array $atts
+     *
+     * @return array
+     */
+    private function filterAtts(array $pairs, array $atts)
+    {
+        $out = array();
+
+        foreach ($pairs as $name => $default) {
+            if (array_key_exists($name, $atts)) {
+                $out[$name] = $atts[$name];
+            } else {
+                $out[$name] = $default;
+            }
+        }
+
+        return $out;
+    }
+
 	/**
 	 * Insert form script to the content
 	 *
@@ -132,79 +209,102 @@ JS;
 			return true;
 		}
 
-		// Should we do mautic form replacements?
-		if (strpos($article->text, '{mauticform') !== false || strpos($article->text, '{mautic type="form"') !== false)
-		{
-			// BC layer to allow old {mauticform tags to work
-			$article->text = str_replace('{mauticform', '{mautic type="form"', $article->text);
+		// Replace {mauticform with {mautic type="form"
+        $article->text = str_replace('{mauticform', '{mautic type="form"', $article->text);
 
-			// expression to search for (positions)
-			$formRegex = '/{mautic type="form" (\d+)}/i';
+        preg_match_all($this->mauticRegex, $article->text, $matches, PREG_SET_ORDER);
 
-			// $matches[0] is full pattern match, $matches[1] is the repo declaration
-			preg_match_all($formRegex, $article->text, $matches, PREG_SET_ORDER);
+        foreach ($matches as $match)
+        {
+            $atts = $this->parseShortcodeAtts($match[3]);
+            $method = 'do' . ucfirst(strtolower($atts['type'])) . 'Shortcode';
+            $newContent = '';
 
-			if ($matches && isset($matches[0]))
-			{
-				foreach ($matches as $match)
-				{
-					if (isset($match[1]))
-					{
-						$formId = (int) $match[1];
-						$formTag = '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $formId . '"></script>';
-						$article->text = str_replace($match[0], $formTag, $article->text);
-					}
-				}
-			}
-		}
+            if (method_exists($this, $method))
+            {
+                $newContent = call_user_func(array($this, $method), $atts, $match[5]);
+            }
 
-		// Should we do mautic content replacements?
-		if (strpos($article->text, '{mautic type="content"') !== false)
-		{
-			$article->text = $this->doContentReplacement($article->text);
-
-			// Replace empty default content with full tag, and do it again
-			$tmpText = preg_replace('/{mautic type="content" slot="(\w+)"}/i', '{mautic type="content" slot="$1"}{/mautic}', $article->text);
-
-			// If any replacements occured, there is a content item with an empty default content
-			if ($article->text !== $tmpText)
-			{
-				$article->text = $this->doContentReplacement($tmpText);
-			}
-		}
+            $article->text = str_replace($match[0], $newContent, $article->text);
+        }
 	}
 
-	/**
-	 * Does a search/replace for Mautic dynamic content
-	 *
-	 * @param $content
-	 *
-	 * @return string
-	 */
-	private function doContentReplacement($content)
-	{
-		// Replace full tags
-		$contentRegex = '/{mautic type="content" slot="(\w+)"}(.*){\/mautic}/i';
+    /**
+     * Do a find/replace for Mautic forms
+     *
+     * @param array $atts
+     *
+     * @return string
+     */
+	public function doFormShortcode($atts)
+    {
+        return '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $atts['id'] . '"></script>';
+    }
 
-		// $matches[0] is full pattern match, $matches[1] is the repo declaration
-		preg_match_all($contentRegex, $content, $dwcMatches, PREG_SET_ORDER);
+    /**
+     * Do a find/replace for Mautic dynamic content
+     *
+     * @param array  $atts
+     * @param string $content
+     *
+     * @return string
+     */
+    public function doContentShortcode($atts, $content)
+    {
+        return '<div class="mautic-slot" data-slot-name="' . $atts['slot'] . '">' . $content . '</div>';
+    }
 
-		if ($dwcMatches && isset($dwcMatches[0]))
-		{
-			foreach ($dwcMatches as $dwcMatch)
-			{
-				if (isset($dwcMatch[1]))
-				{
-					$slot = $dwcMatch[1];
-					$defaultContent = $dwcMatch[2];
-					$dwcTag = '<div class="mautic-slot" data-slot-name="' . $slot . '">' . $defaultContent . '</div>';
-					$content = str_replace($dwcMatch[0], $dwcTag, $content);
-				}
-			}
-		}
+    /**
+     * Do a find/replace for Mautic gated video
+     *
+     * @param $content
+     *
+     * @return string
+     */
+    public function doVideoShortcode($atts, $content)
+    {
+        $video_type = '';
+        $atts = $this->filterAtts(array(
+            'gate-time' => 15,
+            'form-id' => '',
+            'src' => '',
+            'width' => 640,
+            'height' => 360
+        ), $atts);
 
-		return $content;
-	}
+        if (empty($atts['src']))
+        {
+            return 'You must provide a video source. Add a src="URL" attribute to your shortcode. Replace URL with the source url for your video.';
+        }
+
+        if (empty($atts['form-id']))
+        {
+            return 'You must provide a mautic form id. Add a form-id="#" attribute to your shortcode. Replace # with the id of the form you want to use.';
+        }
+
+        if (preg_match('/^.*((youtu.be)|(youtube.com))\/((v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))?\??v?=?([^#\&\?]*).*/', $atts['src']))
+        {
+            $video_type = 'youtube';
+        }
+
+        if (preg_match('/^.*(vimeo\.com\/)((channels\/[A-z]+\/)|(groups\/[A-z]+\/videos\/))?([0-9]+)/', $atts['src']))
+        {
+            $video_type = 'vimeo';
+        }
+
+        if (strtolower(substr($atts['src'], -3)) === 'mp4')
+        {
+            $video_type = 'mp4';
+        }
+
+        if (empty($video_type))
+        {
+            return 'Please use a supported video type. The supported types are youtube, vimeo, and MP4.';
+        }
+
+        return '<video height="' . $atts['height'] . '" width="' . $atts['width'] . '" data-form-id="' . $atts['form-id'] . '" data-gate-time="' . $atts['gate-time'] . '">' .
+        '<source type="video/' . $video_type . '" src="' . $atts['src'] . '" /></video>';
+    }
 
 	/**
 	* Mautic API call
