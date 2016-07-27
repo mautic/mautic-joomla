@@ -29,6 +29,16 @@ To embed Mautic dynamic content, insert this code snippet:
 
 slot_name is the identifier of the slot that you specified when adding a "Request dynamic content" decision to your campaign.
 
+### Gated video embed
+
+Mautic gated video supports YouTube, Vimeo, and MP4. If you want to use gated video on a Vimeo video, you must manually include the Froogaloop javascript. Also, to use gated video, you must manually include the jQuery javascript library on your page.
+
+To embed Mautic gated videos, insert this code snippet:
+
+    {mautic type="video" height="320" width="640" src="https://www.youtube.com/watch?v=QT6169rdMdk" gate-time="15" form-id="1"}
+    
+Note, you must replace the src with the URL to the video. Height and width attributes are optional, and will default to the values shown if omitted. Gate time is the time, in seconds, that you would like to pause the video and display the form that you entered as the form-id. 
+
 ### Plugin authorization
 
 It is possible to send Lead data to Mautic via API only after authorization. You can create specific authorization API credentials for each application. To do that, go to your Mautic administration and follow these steps:
