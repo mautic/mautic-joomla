@@ -27,7 +27,7 @@ class plgSystemMautic extends JPlugin
      *
      * @var string
      */
-    protected $mauticRegex = '/\{(\{?)(mautic)(?![\w-])([^\}\/]*(?:\/(?!\})[^\}\/]*)*?)(?:(\/)\}|\}(?:([^\{]*+(?:\[(?!\/\2\])[^\[]*+)*+)\{\/\2\})?)(\}?)/i';
+    protected $mauticRegex = '/\{(\{?)(mautic)(?![\w-])([^\}\/]*(?:\/(?!\})[^\}\/]*)*?)(?:(\/)\}|\}(?:([^\{]*+(?:\{(?!\/\2\})[^\{]*+)*+)\{\/\2\})?)(\}?)/i';
 
     /**
      * Taken from WP get_shortcode_atts_regex
