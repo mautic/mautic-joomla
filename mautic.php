@@ -99,7 +99,7 @@ class plgSystemMautic extends JPlugin
 			}
 		}
 
-		$mauticUrl = trim($this->params->get('base_url'), ' \t\n\r\0\x0B/');
+		$mauticUrl = trim($this->params->get('base_url'), " \t\n\r\0\x0B/");
 		$attrs     = json_encode($attrs, JSON_FORCE_OBJECT);
 
 		$mauticTrackingJS = <<<JS
@@ -177,7 +177,7 @@ JS;
     {
         $id = isset($atts['id']) ? $atts['id'] : $atts[0];
 
-        return '<script type="text/javascript" src="' . trim($this->params->get('base_url'), ' \t\n\r\0\x0B/') . '/form/generate.js?id=' . $id . '"></script>';
+        return '<script type="text/javascript" src="' . trim($this->params->get('base_url'), " \t\n\r\0\x0B/") . '/form/generate.js?id=' . $id . '"></script>';
     }
 
     /**
