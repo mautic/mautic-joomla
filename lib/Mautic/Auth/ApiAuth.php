@@ -1,10 +1,12 @@
 <?php
-/**
- * @package     Mautic
- * @copyright   2014 Mautic, NP. All rights reserved.
- * @author      Mautic
- * @link        http://mautic.org
- * @license     MIT http://opensource.org/licenses/MIT
+
+/*
+ * @copyright   2014 Mautic Contributors. All rights reserved
+ * @author      Mautic, Inc.
+ *
+ * @link        https://mautic.org
+ *
+ * @license     GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  */
 
 namespace Mautic\Auth;
@@ -14,14 +16,32 @@ namespace Mautic\Auth;
  */
 class ApiAuth
 {
-
     /**
+     * Get an API Auth object
+     *
      * @param array  $parameters
      * @param string $authMethod
      *
-     * @return mixed
+     * @return AuthInterface
+     *
+     * @deprecated
      */
     public static function initiate($parameters = array(), $authMethod = 'OAuth')
+    {
+        $object = new self;
+
+        return $object->newAuth($parameters, $authMethod);
+    }
+
+    /**
+     * Get an API Auth object
+     *
+     * @param array  $parameters
+     * @param string $authMethod
+     *
+     * @return AuthInterface
+     */
+    public function newAuth($parameters = array(), $authMethod = 'OAuth')
     {
         $class      = 'Mautic\\Auth\\'.$authMethod;
         $authObject = new $class();

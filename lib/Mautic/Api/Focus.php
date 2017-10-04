@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * @package     Mautic
  * @copyright   2014 Mautic, NP. All rights reserved.
  * @author      Mautic
@@ -9,41 +9,36 @@
 
 namespace Mautic\Api;
 
-/**
- * Points Context
+/*
+ * Emails Context
  */
-class Points extends Api
+class Focus extends Api
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'points';
+    protected $endpoint = 'focus';
 
     /**
      * {@inheritdoc}
      */
-    protected $listName = 'points';
+    protected $listName = 'focus';
 
     /**
      * {@inheritdoc}
      */
-    protected $itemName = 'point';
+    protected $itemName = 'focus';
 
     /**
      * {@inheritdoc}
      */
     protected $searchCommands = array(
         'ids',
+        'is:published',
+        'is:unpublished',
+        'is:mine',
+        'is:uncategorized',
+        'category',
     );
-
-    /**
-     * Get list of available action types
-     *
-     * @return array|mixed
-     */
-    public function getPointActionTypes()
-    {
-        return $this->makeRequest($this->endpoint.'/actions/types');
-    }
 }

@@ -10,40 +10,32 @@
 namespace Mautic\Api;
 
 /**
- * Points Context
+ * Roles Context
  */
-class Points extends Api
+class Roles extends Api
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'points';
+    protected $endpoint = 'roles';
 
     /**
      * {@inheritdoc}
      */
-    protected $listName = 'points';
+    protected $listName = 'roles';
 
     /**
      * {@inheritdoc}
      */
-    protected $itemName = 'point';
+    protected $itemName = 'role';
 
     /**
      * {@inheritdoc}
      */
     protected $searchCommands = array(
         'ids',
+        'is:admin',
+        'name',
     );
-
-    /**
-     * Get list of available action types
-     *
-     * @return array|mixed
-     */
-    public function getPointActionTypes()
-    {
-        return $this->makeRequest($this->endpoint.'/actions/types');
-    }
 }

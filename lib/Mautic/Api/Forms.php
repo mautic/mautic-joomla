@@ -23,24 +23,50 @@ class Forms extends Api
     /**
      * {@inheritdoc}
      */
-    public function create(array $parameters)
-    {
-        return $this->actionNotSupported('create');
-    }
+    protected $listName = 'forms';
 
     /**
      * {@inheritdoc}
      */
-    public function edit($id, array $parameters, $createIfNotExists = false)
-    {
-        return $this->actionNotSupported('edit');
-    }
+    protected $itemName = 'form';
 
     /**
      * {@inheritdoc}
      */
-    public function delete($id)
+    protected $searchCommands = array(
+        'ids',
+        'is:published',
+        'is:unpublished',
+        'is:mine',
+        'is:uncategorized',
+        'category',
+        'name',
+        'has:results',
+    );
+
+    /**
+     * Remove fields from a form
+     *
+     * @param integer $formId
+     * @param array   $fieldIds
+     *
+     * @return array|mixed
+     */
+    public function deleteFields($formId, array $fieldIds)
     {
-        return $this->actionNotSupported('delete');
+        return $this->makeRequest($this->endpoint.'/'.$formId.'/fields/delete', array('fields' => $fieldIds), 'DELETE');
+    }
+
+    /**
+     * Remove actions from a form
+     *
+     * @param integer $formId
+     * @param array   $actionIds
+     *
+     * @return array|mixed
+     */
+    public function deleteActions($formId, array $actionIds)
+    {
+        return $this->makeRequest($this->endpoint.'/'.$formId.'/actions/delete', array('actions' => $actionIds), 'DELETE');
     }
 }

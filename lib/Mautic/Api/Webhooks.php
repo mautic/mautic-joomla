@@ -10,40 +10,45 @@
 namespace Mautic\Api;
 
 /**
- * Points Context
+ * Webhooks Context
  */
-class Points extends Api
+class Webhooks extends Api
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'points';
+    protected $endpoint = 'hooks';
 
     /**
      * {@inheritdoc}
      */
-    protected $listName = 'points';
+    protected $listName = 'hooks';
 
     /**
      * {@inheritdoc}
      */
-    protected $itemName = 'point';
+    protected $itemName = 'hook';
 
     /**
      * {@inheritdoc}
      */
     protected $searchCommands = array(
         'ids',
+        'is:published',
+        'is:unpublished',
+        'is:mine',
+        'is:uncategorized',
+        'category',
     );
 
     /**
-     * Get list of available action types
+     * Get list of available webhook triggers
      *
      * @return array|mixed
      */
-    public function getPointActionTypes()
+    public function getTriggers()
     {
-        return $this->makeRequest($this->endpoint.'/actions/types');
+        return $this->makeRequest($this->endpoint.'/triggers');
     }
 }

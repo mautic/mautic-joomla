@@ -23,26 +23,33 @@ class Emails extends Api
     /**
      * {@inheritdoc}
      */
-    public function create(array $parameters)
-    {
-        return $this->actionNotSupported('create');
-    }
+    protected $listName = 'emails';
 
     /**
      * {@inheritdoc}
      */
-    public function edit($id, array $parameters, $createIfNotExists = false)
-    {
-        return $this->actionNotSupported('edit');
-    }
+    protected $itemName = 'email';
+
+    /**
+     * @var array
+     */
+    protected $bcRegexEndpoints = array(
+        'emails/(.*?)/contact/(.*?)/send' => 'emails/$1/send/contact/$2', // 2.6.0
+    );
 
     /**
      * {@inheritdoc}
      */
-    public function delete($id)
-    {
-        return $this->actionNotSupported('delete');
-    }
+    protected $searchCommands = array(
+        'ids',
+        'is:published',
+        'is:unpublished',
+        'is:mine',
+        'is:uncategorized',
+        'category',
+        'lang',
+    );
+
 
     /**
      * Send email to the assigned lists
@@ -57,7 +64,22 @@ class Emails extends Api
     }
 
     /**
+     * Send email to a specific contact
+     *
+     * @param int $id
+     * @param int $contactId
+     *
+     * @return array|mixed
+     */
+    public function sendToContact($id, $contactId)
+    {
+        return $this->makeRequest($this->endpoint.'/'.$id.'/contact/'.$contactId.'/send', array(), 'POST');
+    }
+
+    /**
      * Send email to a specific lead
+     *
+     * @deprecated use sendToContact instead
      *
      * @param int $id
      * @param int $leadId
@@ -66,6 +88,6 @@ class Emails extends Api
      */
     public function sendToLead($id, $leadId)
     {
-        return $this->makeRequest($this->endpoint.'/'.$id.'/send/lead/'.$leadId, array(), 'POST');
+        return $this->sendToContact($id, $leadId);
     }
 }

@@ -7,15 +7,26 @@
  * @license     MIT http://opensource.org/licenses/MIT
  */
 
-namespace Mautic\Exception;
+namespace Mautic\Api;
 
 /**
- * Exception representing a requested API context which was not found
+ * Devices Context
  */
-class ContextNotFoundException extends AbstractApiException
+class Devices extends Api
 {
+
     /**
      * {@inheritdoc}
      */
-    const DEFAULT_MESSAGE = 'Context not found.';
+    protected $endpoint = 'devices';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $listName = 'devices';
+
+    /**
+     * {@inheritdoc}
+     */
+    protected $itemName = 'device';
 }

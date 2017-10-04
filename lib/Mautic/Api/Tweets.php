@@ -10,35 +10,28 @@
 namespace Mautic\Api;
 
 /**
- * Assets Context
+ * Tweets Context
  */
-class Assets extends Api
+class Tweets extends Api
 {
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'assets';
+    protected $endpoint = 'tweets';
 
     /**
      * {@inheritdoc}
      */
-    protected $listName = 'assets';
+    protected $listName = 'tweets';
 
     /**
      * {@inheritdoc}
      */
-    protected $itemName = 'asset';
+    protected $itemName = 'tweet';
 
     /**
      * {@inheritdoc}
      */
-    protected $searchCommands = array(
-        'ids',
-        'is:published',
-        'is:unpublished',
-        'is:mine',
-        'is:uncategorized',
-        'category',
-    );
+    protected $searchCommands = array();
 }

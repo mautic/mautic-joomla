@@ -10,25 +10,24 @@
 namespace Mautic\Api;
 
 /**
- * Points Context
+ * Notes Context
  */
-class Points extends Api
+class Notes extends Api
 {
+    /**
+     * {@inheritdoc}
+     */
+    protected $endpoint = 'notes';
 
     /**
      * {@inheritdoc}
      */
-    protected $endpoint = 'points';
+    protected $listName = 'notes';
 
     /**
      * {@inheritdoc}
      */
-    protected $listName = 'points';
-
-    /**
-     * {@inheritdoc}
-     */
-    protected $itemName = 'point';
+    protected $itemName = 'note';
 
     /**
      * {@inheritdoc}
@@ -36,14 +35,4 @@ class Points extends Api
     protected $searchCommands = array(
         'ids',
     );
-
-    /**
-     * Get list of available action types
-     *
-     * @return array|mixed
-     */
-    public function getPointActionTypes()
-    {
-        return $this->makeRequest($this->endpoint.'/actions/types');
-    }
 }
