@@ -7,13 +7,13 @@
         <type>plugin</type>
         <folder>system</folder>
         <client>0</client>
-        <version>1.1.0</version>
-        <infourl title="Mautic"><![CDATA[https://github.com/mautic/mautic-joomla]]></infourl>
+        <version>1.2.0</version>
+        <infourl title="Mautic">https://github.com/mautic/mautic-joomla</infourl>
         <downloads>
-            <downloadurl type="full" format="zip"><![CDATA[https://github.com/mautic/mautic-joomla/archive/master.zip]]></downloadurl>
+            <downloadurl type="full" format="zip">https://github.com/mautic/mautic-joomla/archive/master.zip</downloadurl>
         </downloads>
         <maintainer>Mautic community</maintainer>
-        <maintainerurl><![CDATA[http://mautic.org]]></maintainerurl>
+        <maintainerurl>http://mautic.org</maintainerurl>
         <targetplatform name="joomla" version=".*"/>
     </update>
 </updates>
