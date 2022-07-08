@@ -69,7 +69,7 @@ class plgSystemMautic extends JPlugin
 		$input    = $app->input;
 
 		// Check to make sure we are loading an HTML view and there is a main component area
-		if ($document->getType() !== 'html' || $input->get('tmpl', '', 'cmd') === 'component' || $app->isAdmin())
+		if ($document->getType() !== 'html' || $input->get('tmpl', '', 'cmd') === 'component' || $app->isClient('administrator'))
 		{
 			return true;
 		}
@@ -134,7 +134,7 @@ JS;
 		// Check to make sure we are loading an HTML view and there is a main component area and content is not being indexed
 		if ($document->getType() !== 'html'
 			|| $input->get('tmpl', '', 'cmd') === 'component'
-			|| $app->isAdmin()
+			|| $app->isClient('administrator')
 			|| $context == 'com_finder.indexer')
 		{
 			return true;
