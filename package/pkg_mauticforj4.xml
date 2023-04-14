@@ -9,7 +9,7 @@
 	<license>GNU General Public License version 3 or later; see LICENSE.txt</license>
 	<authorEmail>extensions@mautic.org</authorEmail>
 	<authorUrl>www.mautic.org</authorUrl>
-	<version>2.0.0-rc</version>
+	<version>2.0.0</version>
 	<files>
 		<file id="lib_mautic" type="library">lib_mautic.zip</file>
 		<file id="plg_system_mautic" type="plugin" group="system">plg_system_mautic.zip</file>
@@ -17,6 +17,6 @@
 	<scriptfile>script.php</scriptfile>
 	<updateservers>
 	<!-- TODO Change url to mautic/mautic-joomla main or another branch ?!! -->
-		<server type="extension" priority="1" name="SimplySmartIT Update Server at GitHub"><![CDATA[https://github.com/simplysmartit/mautic-joomla4/update.xml]]></server>
+		<server type="extension" priority="1" name="Mautic Update Server at GitHub"><![CDATA[https://github.com/mautic/mautic-joomla4/update.xml]]></server>
 	</updateservers>
 </extension>
