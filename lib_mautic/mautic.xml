@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="library" method="upgrade" version="4.0">
+	<name>lib_mautic</name>
+	<author>Mautic</author>
+	<creationDate>2023-04</creationDate>,
+	<copyright>(C) 2023 Mautic. All rights reserved.</copyright>
+	<license>GNU General Public License version 3 or later; see LICENSE.txt</license>
+	<authorEmail>extensions@mautic.org</authorEmail>
+	<authorUrl>www.mautic.org</authorUrl>
+	<version>3.1.0</version>
+	<description>LIB_MAUTIC_XML_DESCRIPTION</description>
+	<libraryname>mautic</libraryname>
+	<namespace path="src/vendor/mautic/api-library/lib">Mautic</namespace>
+	<files>
+		<folder>src</folder>
+	</files>
+	<languages folder="language">
+		<language tag="en-GB">en-GB/lib_mautic.ini</language>
+		<language tag="en-GB">en-GB/lib_mautic.sys.ini</language>
+	</languages>
+</extension>

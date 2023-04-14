@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" version="4.0" group="system" method="upgrade">
+	<name>plg_system_mautic</name>
+	<author>Mautic</author>
+	<creationDate>2023-04</creationDate>
+	<copyright>Copyright 2014 - 2023 Mautic. All rights reserved.</copyright>
+    <license>GNU/GPL Version 3 or later</license>
+	<authorEmail>extensions@mautic.org</authorEmail>
+	<authorUrl>www.mautic.org</authorUrl>
+	<version>2.0.0</version>
+	<description>PLG_SYSTEM_MAUTIC_XML_DESCRIPTION</description>
+	<namespace path="src">Joomla\Plugin\System\Mautic</namespace>
+    <scriptfile>script.php</scriptfile>
+	<files>
+		<filename plugin="mautic">mautic.php</filename>
+		<folder>src</folder>
+	</files>
+	<media folder="media" destination="plg_system_mautic">
+		<folder>js</folder>
+	</media>
+	<languages folder="language" destination="plg_system_mautic">
+		<language tag="en-GB">en-GB/plg_system_mautic.ini</language>
+		<language tag="en-GB">en-GB/plg_system_mautic.sys.ini</language>
+		<language tag="de-DE">de-DE/plg_system_mautic.ini</language>
+		<language tag="de-DE">de-DE/plg_system_mautic.sys.ini</language>
+	</languages>
+	<config>
+		<fields name="params">
+			<fieldset name="basic" addfieldprefix="Joomla\Plugin\System\Mautic\Field">
+				<field
+					type="spacer"
+					class="text"
+					parentclass="stack"
+					name="base_url_header_note"
+					label="PLG_SYSTEM_MAUTIC_BASE_URL_HEADER_NOTE"
+				/>
+				<field
+					name="base_url"
+					type="url"
+					required="true"
+					label="PLG_SYSTEM_MAUTIC_BASE_URL"
+					description="PLG_SYSTEM_MAUTIC_BASE_URL_DESC"
+				/>
+				<field
+					type="spacer"
+					class="text"
+					parentclass="stack"
+					name="oauth_header_note"
+					label="PLG_SYSTEM_MAUTIC_OAUTH_HEADER_NOTE"
+				/>
+				<field
+					name="public_key"
+					type="text"
+					label="PLG_SYSTEM_MAUTIC_PUBLIC_KEY"
+					description="PLG_SYSTEM_MAUTIC_PUBLIC_KEY_DESC"
+				/>
+				<field
+					name="secret_key"
+					type="text"
+					label="PLG_SYSTEM_MAUTIC_SECRET_KEY"
+					description="PLG_SYSTEM_MAUTIC_SECRET_KEY_DESC"
+				/>
+				<field
+					name="callback_path"
+					type="text"
+					default="administrator"
+					required="true"
+					label="PLG_SYSTEM_MAUTIC_CALLBACK_PATH"
+					description="PLG_SYSTEM_MAUTIC_CALLBACK_PATH_DESC"
+				/>
+				<field
+					name="send_registered"
+					type="radio"
+					default="0"
+					label="PLG_SYSTEM_MAUTIC_SEND_REGISTERED"
+					description="PLG_SYSTEM_MAUTIC_SEND_REGISTERED_DESC"
+					class="btn-group btn-group-yesno">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+				<field 
+					name="log_on" 
+					type="radio" 
+					default="1" 
+					label="PLG_SYSTEM_MAUTIC_LOG_ON" 
+					description="PLG_SYSTEM_MAUTIC_LOG_ON_DESC"
+					class="btn-group btn-group-yesno">
+					<option value="0">JNO</option>
+					<option value="1">JYES</option>
+				</field>
+				<field 
+					name="token" 
+					type="Token" 
+					default="" 
+					readonly="true"
+					parentclass="stack span-2"
+					label="PLG_SYSTEM_MAUTIC_TOKEN_LABEL" 
+					description="PLG_SYSTEM_MAUTIC_TOKEN_DESC"
+				/>
+			</fieldset>
+		</fields>
+	</config>
+</extension>
