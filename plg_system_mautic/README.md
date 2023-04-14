@@ -68,7 +68,7 @@ It is possible to send Contact data to Mautic via API only after authorization w
 ## Troubleshoot ##
 
 ### Bug form embed ###
-If you're forms are not embeded you can check the errors in the developer console of your browser. If you see an error like:
+If your forms are not embedded you can check the errors in the developer console of your browser. If you see an error like:
 `/media/js/mautic-form.js not found`
 
 then open the folder `docroot/media/js` in your Mautic instance and check if file `mautic-form.js` is available. If not, then simple copy file with command `cp mautic-form-src.js mautic-form.js`.
@@ -79,19 +79,19 @@ If you want to add more Mautic features, submit PR to this plugin or use this pl
 
 ### Release of the new version
 
-This plugin uses Joomla Update Server which notifies the Joomla admin about availability of new versions of this plugin. To do that, update the version tag in mautic.xml in the master branch and then update version tag at updateserver.xml in the gh-pages branch accordingly.
+This plugin uses Joomla Update Server which notifies the Joomla admin about availability of new versions of this plugin. To do that, update the version tag in mautic.xml in the master branch and then update version tag at updateserver.xml in the main branch accordingly.
 
 [Current updateserver.xml](http://mautic.github.io/mautic-joomla/updateserver.xml)
 
 ### Integrate Mautic with another extension
 
-To add Mautic lead generation to another extension is not hard at all. Just let the joomla amin install and configure this plugin then you can use Mautic API calls. Here is an example how to generate Mautic leads on any form save:
+To add Mautic contact generation to another extension is not hard at all. Just let the joomla admin install and configure this plugin then you can use Mautic API calls. Here is an example how to generate Mautic contacts on any form save:
 
 ```php
 
 $apiHelper      = new \Joomla\Plugin\System\Mautic\Helper\MauticApiHelper();
 /** @var \Mautic\Auth\OAuth $auth */
-$auth		    = $this->apiHelper->getMauticAuth();
+$auth           = $this->apiHelper->getMauticAuth();
 // Check and refresh token if needed
 $authIsValid    = $auth->validateAccessToken();
 if ($authIsValid && $auth->accessTokenUpdated()) {
@@ -99,7 +99,7 @@ if ($authIsValid && $auth->accessTokenUpdated()) {
 }
 /** @var \Mautic\Api\Contacts $contactsapi */
 $mauticApi      = new \Mautic\MauticApi();
-$contactsApi     = $mauticApi->newApi(
+$contactsApi    = $mauticApi->newApi(
     "contacts", 
     $auth, 
     $apiHelper->getMauticBaseUrl() . '/api/'
