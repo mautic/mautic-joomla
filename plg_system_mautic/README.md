@@ -7,14 +7,14 @@ This [Joomla](http://joomla.org)[^1] Package lets you add the [Mautic](http://ma
 
 ### Mautic Tracking
 
-Tracking option works right after you enable the plugin, insert Base URL and save the plugin. It loads a piece of javascript code to communicate with your Mautic instance.
+The tracking option works right after you enable the plugin, insert Base URL and save the plugin. It loads a piece of javascript code to communicate with your Mautic instance.
 
-If it doesn't work please check also your Mautic CORS configuration settings. If the CORS option is enabled in Mautic then the base url of the website where this plugin is running must be listed in valid domains.
+If it doesn't work please check also your Mautic CORS configuration settings. If the CORS option is enabled in Mautic then the base URL of the website where this plugin is running must be listed in valid domains.
 Otherwise you see some errors in the javascript console, that it is blocked by CORS settings.
 
 #### Image - noscript option
 
-Tracking images for noscript option works right after you enable the plugin, insert Base URL and save the plugin. That means it will insert 1 px gif image loaded from your Mautic instance. You can check HTML source code (CTRL + U) of your Joomla website to make sure the plugin works. You should be able to find something like this:
+The tracking images for noscript option works right after you enable the plugin, insert the Base URL and save the plugin. That means it will insert 1 px gif image loaded from your Mautic instance. You can check HTML source code (CTRL + U) of your Joomla website to make sure the plugin works. You should be able to find something like this:
 
 `<noscript><img src="http://yourmautic.com/mtracking.gif" /></noscript>`
 
@@ -50,7 +50,7 @@ Note, you must replace the src with the URL to the video. Height and width attri
 
 ### Tags
 
-To embed Mautic Tags, insert this code snippet:
+To embed the ability to append Mautic Tags to a contact on a page load, insert this code snippet:
 
     {mautic type="tags" tags="tag1,tag2,-removetag"}
 
@@ -61,7 +61,7 @@ You can add or remove one or multiple lead tags on specific pages using commas. 
 It is possible to send Contact data to Mautic via API only after authorization with OAuth2. You can create specific authorization API credentials for each application. To do that, go to your Mautic administration and follow these steps:
 
 1. Go to Mautic Configuration / API Settings and set 'API enabled' to 'Yes'. Save changes.
-2. At the right-hand side menu where Configuration is should appear new menu item 'API Credentials'. Hit it.
+2. At the right-hand side menu where Configuration is displayed, there should appear new menu item 'API Credentials'. Click it.
 3. Create new credential. Fill in 'Name' ('Joomla instance' for example) and Callback URL to ```https://{yourJoomla.com}/administrator``` (change ```{yourJoomla.com}``` with actual URL of your Joomla instance). It goes to /administrator to make sure only Joomla admins can authorize Mautic plugin. If you have modified the ` Joomla Callback Path Field` in your Joomla Plugin Settings then you have to change the subpath here accordingly. Save credentials.
 4. Mautic should generate 'Client ID / Public Key' and 'Client Secret / Private Key'. Copy those two to Joomla plugin. Save the plugin. Hit the 'Authorize' button and follow instructions.
 
