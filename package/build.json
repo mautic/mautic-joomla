@@ -1,0 +1,37 @@
+{
+	"packages": [
+		{
+			"name": "MauticForJ4",
+			"originalManifestFileName": "pkg_mauticforj4",
+			"substituteManifestFileName": "pkg_mauticforj4",
+			"extensions": [
+				{
+					"name": "lib_mautic",
+					"excludes": [
+						".git",
+						".gitignore",
+						".gitattributes",
+						"src/vendor/composer",
+						"src/vendor/psr",
+						"src/vendor/autoload.php",
+						"src/vendor/mautic/api-library/.ddev",
+						"src/vendor/mautic/api-library/.github",
+						"src/vendor/mautic/api-library/apitester",
+						"src/vendor/mautic/api-library/tests",
+						"src/vendor/mautic/api-library/.gitignore",
+						"src/vendor/mautic/api-library/.php_cs",
+						"src/vendor/mautic/api-libraray/phpunit.xml.dist"
+					]
+				},
+				{
+					"name": "plg_system_mautic",
+					"excludes": [
+						".git",
+						".gitignore",
+						".gitattributes"
+					]
+				}
+			]
+		}
+	]
+}
