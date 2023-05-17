@@ -81,7 +81,7 @@ If you want to add more Mautic features, submit PR to this plugin or use this pl
 
 This plugin uses Joomla Update Server which notifies the Joomla admin about availability of new versions of this plugin. To do that, update the version tag in mautic.xml in the master branch and then update version tag at updateserver.xml in the main branch accordingly.
 
-[Current updateserver.xml](http://mautic.github.io/mautic-joomla/updateserver.xml)
+[Current updateserver.xml](https://mautic.github.io/mautic-joomla/updateserver.xml)
 
 ### Integrate Mautic with another extension
 

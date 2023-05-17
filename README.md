@@ -50,7 +50,7 @@ Note, you must replace the src with the URL to the video. Height and width attri
 
 ### Tags
 
-To embed Mautic Tags, insert this code snippet:
+To embed the ability to append Mautic Tags to a contact on a page load, insert this code snippet:
 
     {mautic type="tags" tags="tag1,tag2,-removetag"}
 
@@ -68,7 +68,7 @@ It is possible to send Contact data to Mautic via API only after authorization w
 ## Troubleshoot ##
 
 ### Bug form embed ###
-If you're forms are not embeded you can check the errors in the developer console of your browser. If you see an error like:
+If your forms are not embedded you can check the errors in the developer console of your browser. If you see an error like:
 `/media/js/mautic-form.js not found`
 
 then open the folder `docroot/media/js` in your Mautic instance and check if file `mautic-form.js` is available. If not, then simple copy file with command `cp mautic-form-src.js mautic-form.js`.
